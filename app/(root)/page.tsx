@@ -1,13 +1,13 @@
 //landing page
 'use client';
-import React from 'react'
+import React, { useEffect } from 'react'
 import Image from 'next/image'
 import Footer from '@/components/Footer';
 import ModelCard from '@/components/cards/ModelCard';
 import HeroAnimation from '@/components/animation/HeroAnimation';
 import { itemsQuery } from '../globalUse';
 import { useSession } from 'next-auth/react';
-
+import { useSearchParams } from 'next/navigation';
 
 const Home = () => {
   const { data:session,status } = useSession();
@@ -15,6 +15,15 @@ const Home = () => {
   const [isSelectId,setIsSelectId] = React.useState('ALL');
   //for Newest Hottest Query
   const [isQueryArrange,setIsQueryArrange] = React.useState('Newest')
+  const SearchParams = useSearchParams();
+  useEffect(() => {
+    if(SearchParams.get('status') === 'success'){
+      alert("貼文上傳成功!");
+      // 靜默清除網址上的 ?status=success，保持網址整潔且防止重新整理重複觸發
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  },[SearchParams])
 
   return (
     <div className='mt-20'>

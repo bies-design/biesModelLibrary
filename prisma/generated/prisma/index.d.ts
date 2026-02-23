@@ -1193,6 +1193,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type PostCountOutputType
+   */
+
+  export type PostCountOutputType = {
+    models: number
+  }
+
+  export type PostCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    models?: boolean | PostCountOutputTypeCountModelsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * PostCountOutputType without action
+   */
+  export type PostCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the PostCountOutputType
+     */
+    select?: PostCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * PostCountOutputType without action
+   */
+  export type PostCountOutputTypeCountModelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ModelWhereInput
+  }
+
+
+  /**
    * Count Type UserCountOutputType
    */
 
@@ -3500,7 +3531,6 @@ export namespace Prisma {
     description: string | null
     type: string | null
     coverImage: string | null
-    modelId: string | null
     uploaderId: string | null
     permission: string | null
     team: string | null
@@ -3516,7 +3546,6 @@ export namespace Prisma {
     description: string | null
     type: string | null
     coverImage: string | null
-    modelId: string | null
     uploaderId: string | null
     permission: string | null
     team: string | null
@@ -3534,7 +3563,7 @@ export namespace Prisma {
     keywords: number
     coverImage: number
     images: number
-    modelId: number
+    pdfIds: number
     uploaderId: number
     relatedPosts: number
     permission: number
@@ -3553,7 +3582,6 @@ export namespace Prisma {
     description?: true
     type?: true
     coverImage?: true
-    modelId?: true
     uploaderId?: true
     permission?: true
     team?: true
@@ -3569,7 +3597,6 @@ export namespace Prisma {
     description?: true
     type?: true
     coverImage?: true
-    modelId?: true
     uploaderId?: true
     permission?: true
     team?: true
@@ -3587,7 +3614,7 @@ export namespace Prisma {
     keywords?: true
     coverImage?: true
     images?: true
-    modelId?: true
+    pdfIds?: true
     uploaderId?: true
     relatedPosts?: true
     permission?: true
@@ -3679,7 +3706,7 @@ export namespace Prisma {
     keywords: string[]
     coverImage: string
     images: string[]
-    modelId: string
+    pdfIds: string[]
     uploaderId: string
     relatedPosts: string[]
     permission: string
@@ -3715,15 +3742,16 @@ export namespace Prisma {
     keywords?: boolean
     coverImage?: boolean
     images?: boolean
-    modelId?: boolean
+    pdfIds?: boolean
     uploaderId?: boolean
     relatedPosts?: boolean
     permission?: boolean
     team?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    model?: boolean | ModelDefaultArgs<ExtArgs>
+    models?: boolean | Post$modelsArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
+    _count?: boolean | PostCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["post"]>
 
   export type PostSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -3736,14 +3764,13 @@ export namespace Prisma {
     keywords?: boolean
     coverImage?: boolean
     images?: boolean
-    modelId?: boolean
+    pdfIds?: boolean
     uploaderId?: boolean
     relatedPosts?: boolean
     permission?: boolean
     team?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    model?: boolean | ModelDefaultArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["post"]>
 
@@ -3757,14 +3784,13 @@ export namespace Prisma {
     keywords?: boolean
     coverImage?: boolean
     images?: boolean
-    modelId?: boolean
+    pdfIds?: boolean
     uploaderId?: boolean
     relatedPosts?: boolean
     permission?: boolean
     team?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    model?: boolean | ModelDefaultArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["post"]>
 
@@ -3778,7 +3804,7 @@ export namespace Prisma {
     keywords?: boolean
     coverImage?: boolean
     images?: boolean
-    modelId?: boolean
+    pdfIds?: boolean
     uploaderId?: boolean
     relatedPosts?: boolean
     permission?: boolean
@@ -3787,24 +3813,23 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type PostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shortId" | "title" | "category" | "description" | "type" | "keywords" | "coverImage" | "images" | "modelId" | "uploaderId" | "relatedPosts" | "permission" | "team" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
+  export type PostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "shortId" | "title" | "category" | "description" | "type" | "keywords" | "coverImage" | "images" | "pdfIds" | "uploaderId" | "relatedPosts" | "permission" | "team" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
   export type PostInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    model?: boolean | ModelDefaultArgs<ExtArgs>
+    models?: boolean | Post$modelsArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
+    _count?: boolean | PostCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PostIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    model?: boolean | ModelDefaultArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type PostIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    model?: boolean | ModelDefaultArgs<ExtArgs>
     uploader?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $PostPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Post"
     objects: {
-      model: Prisma.$ModelPayload<ExtArgs>
+      models: Prisma.$ModelPayload<ExtArgs>[]
       uploader: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -3817,7 +3842,7 @@ export namespace Prisma {
       keywords: string[]
       coverImage: string
       images: string[]
-      modelId: string
+      pdfIds: string[]
       uploaderId: string
       relatedPosts: string[]
       permission: string
@@ -4218,7 +4243,7 @@ export namespace Prisma {
    */
   export interface Prisma__PostClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    model<T extends ModelDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ModelDefaultArgs<ExtArgs>>): Prisma__ModelClient<$Result.GetResult<Prisma.$ModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    models<T extends Post$modelsArgs<ExtArgs> = {}>(args?: Subset<T, Post$modelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     uploader<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4258,7 +4283,7 @@ export namespace Prisma {
     readonly keywords: FieldRef<"Post", 'String[]'>
     readonly coverImage: FieldRef<"Post", 'String'>
     readonly images: FieldRef<"Post", 'String[]'>
-    readonly modelId: FieldRef<"Post", 'String'>
+    readonly pdfIds: FieldRef<"Post", 'String[]'>
     readonly uploaderId: FieldRef<"Post", 'String'>
     readonly relatedPosts: FieldRef<"Post", 'String[]'>
     readonly permission: FieldRef<"Post", 'String'>
@@ -4658,6 +4683,30 @@ export namespace Prisma {
      * Limit how many Posts to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Post.models
+   */
+  export type Post$modelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Model
+     */
+    select?: ModelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Model
+     */
+    omit?: ModelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModelInclude<ExtArgs> | null
+    where?: ModelWhereInput
+    orderBy?: ModelOrderByWithRelationInput | ModelOrderByWithRelationInput[]
+    cursor?: ModelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ModelScalarFieldEnum | ModelScalarFieldEnum[]
   }
 
   /**
@@ -5902,7 +5951,7 @@ export namespace Prisma {
     keywords: 'keywords',
     coverImage: 'coverImage',
     images: 'images',
-    modelId: 'modelId',
+    pdfIds: 'pdfIds',
     uploaderId: 'uploaderId',
     relatedPosts: 'relatedPosts',
     permission: 'permission',
@@ -6193,14 +6242,14 @@ export namespace Prisma {
     keywords?: StringNullableListFilter<"Post">
     coverImage?: StringFilter<"Post"> | string
     images?: StringNullableListFilter<"Post">
-    modelId?: StringFilter<"Post"> | string
+    pdfIds?: StringNullableListFilter<"Post">
     uploaderId?: StringFilter<"Post"> | string
     relatedPosts?: StringNullableListFilter<"Post">
     permission?: StringFilter<"Post"> | string
     team?: StringNullableFilter<"Post"> | string | null
     createdAt?: DateTimeFilter<"Post"> | Date | string
     updatedAt?: DateTimeFilter<"Post"> | Date | string
-    model?: XOR<ModelScalarRelationFilter, ModelWhereInput>
+    models?: ModelListRelationFilter
     uploader?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
@@ -6214,14 +6263,14 @@ export namespace Prisma {
     keywords?: SortOrder
     coverImage?: SortOrder
     images?: SortOrder
-    modelId?: SortOrder
+    pdfIds?: SortOrder
     uploaderId?: SortOrder
     relatedPosts?: SortOrder
     permission?: SortOrder
     team?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    model?: ModelOrderByWithRelationInput
+    models?: ModelOrderByRelationAggregateInput
     uploader?: UserOrderByWithRelationInput
   }
 
@@ -6238,14 +6287,14 @@ export namespace Prisma {
     keywords?: StringNullableListFilter<"Post">
     coverImage?: StringFilter<"Post"> | string
     images?: StringNullableListFilter<"Post">
-    modelId?: StringFilter<"Post"> | string
+    pdfIds?: StringNullableListFilter<"Post">
     uploaderId?: StringFilter<"Post"> | string
     relatedPosts?: StringNullableListFilter<"Post">
     permission?: StringFilter<"Post"> | string
     team?: StringNullableFilter<"Post"> | string | null
     createdAt?: DateTimeFilter<"Post"> | Date | string
     updatedAt?: DateTimeFilter<"Post"> | Date | string
-    model?: XOR<ModelScalarRelationFilter, ModelWhereInput>
+    models?: ModelListRelationFilter
     uploader?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "shortId">
 
@@ -6259,7 +6308,7 @@ export namespace Prisma {
     keywords?: SortOrder
     coverImage?: SortOrder
     images?: SortOrder
-    modelId?: SortOrder
+    pdfIds?: SortOrder
     uploaderId?: SortOrder
     relatedPosts?: SortOrder
     permission?: SortOrder
@@ -6284,7 +6333,7 @@ export namespace Prisma {
     keywords?: StringNullableListFilter<"Post">
     coverImage?: StringWithAggregatesFilter<"Post"> | string
     images?: StringNullableListFilter<"Post">
-    modelId?: StringWithAggregatesFilter<"Post"> | string
+    pdfIds?: StringNullableListFilter<"Post">
     uploaderId?: StringWithAggregatesFilter<"Post"> | string
     relatedPosts?: StringNullableListFilter<"Post">
     permission?: StringWithAggregatesFilter<"Post"> | string
@@ -6454,7 +6503,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     uploader: UserCreateNestedOneWithoutModelsInput
-    posts?: PostCreateNestedManyWithoutModelInput
+    posts?: PostCreateNestedManyWithoutModelsInput
   }
 
   export type ModelUncheckedCreateInput = {
@@ -6468,7 +6517,7 @@ export namespace Prisma {
     errorMessage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    posts?: PostUncheckedCreateNestedManyWithoutModelInput
+    posts?: PostUncheckedCreateNestedManyWithoutModelsInput
   }
 
   export type ModelUpdateInput = {
@@ -6482,7 +6531,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     uploader?: UserUpdateOneRequiredWithoutModelsNestedInput
-    posts?: PostUpdateManyWithoutModelNestedInput
+    posts?: PostUpdateManyWithoutModelsNestedInput
   }
 
   export type ModelUncheckedUpdateInput = {
@@ -6496,7 +6545,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    posts?: PostUncheckedUpdateManyWithoutModelNestedInput
+    posts?: PostUncheckedUpdateManyWithoutModelsNestedInput
   }
 
   export type ModelCreateManyInput = {
@@ -6547,12 +6596,13 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
+    pdfIds?: PostCreatepdfIdsInput | string[]
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
     team?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    model: ModelCreateNestedOneWithoutPostsInput
+    models?: ModelCreateNestedManyWithoutPostsInput
     uploader: UserCreateNestedOneWithoutPostsInput
   }
 
@@ -6566,13 +6616,14 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
-    modelId: string
+    pdfIds?: PostCreatepdfIdsInput | string[]
     uploaderId: string
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
     team?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    models?: ModelUncheckedCreateNestedManyWithoutPostsInput
   }
 
   export type PostUpdateInput = {
@@ -6585,12 +6636,13 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    model?: ModelUpdateOneRequiredWithoutPostsNestedInput
+    models?: ModelUpdateManyWithoutPostsNestedInput
     uploader?: UserUpdateOneRequiredWithoutPostsNestedInput
   }
 
@@ -6604,13 +6656,14 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
-    modelId?: StringFieldUpdateOperationsInput | string
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     uploaderId?: StringFieldUpdateOperationsInput | string
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    models?: ModelUncheckedUpdateManyWithoutPostsNestedInput
   }
 
   export type PostCreateManyInput = {
@@ -6623,7 +6676,7 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
-    modelId: string
+    pdfIds?: PostCreatepdfIdsInput | string[]
     uploaderId: string
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
@@ -6642,6 +6695,7 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
@@ -6659,7 +6713,7 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
-    modelId?: StringFieldUpdateOperationsInput | string
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     uploaderId?: StringFieldUpdateOperationsInput | string
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
@@ -6974,9 +7028,14 @@ export namespace Prisma {
     isEmpty?: boolean
   }
 
-  export type ModelScalarRelationFilter = {
-    is?: ModelWhereInput
-    isNot?: ModelWhereInput
+  export type ModelListRelationFilter = {
+    every?: ModelWhereInput
+    some?: ModelWhereInput
+    none?: ModelWhereInput
+  }
+
+  export type ModelOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type PostCountOrderByAggregateInput = {
@@ -6989,7 +7048,7 @@ export namespace Prisma {
     keywords?: SortOrder
     coverImage?: SortOrder
     images?: SortOrder
-    modelId?: SortOrder
+    pdfIds?: SortOrder
     uploaderId?: SortOrder
     relatedPosts?: SortOrder
     permission?: SortOrder
@@ -7006,7 +7065,6 @@ export namespace Prisma {
     description?: SortOrder
     type?: SortOrder
     coverImage?: SortOrder
-    modelId?: SortOrder
     uploaderId?: SortOrder
     permission?: SortOrder
     team?: SortOrder
@@ -7022,7 +7080,6 @@ export namespace Prisma {
     description?: SortOrder
     type?: SortOrder
     coverImage?: SortOrder
-    modelId?: SortOrder
     uploaderId?: SortOrder
     permission?: SortOrder
     team?: SortOrder
@@ -7043,17 +7100,7 @@ export namespace Prisma {
     none?: AccountWhereInput
   }
 
-  export type ModelListRelationFilter = {
-    every?: ModelWhereInput
-    some?: ModelWhereInput
-    none?: ModelWhereInput
-  }
-
   export type AccountOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type ModelOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -7131,17 +7178,15 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type PostCreateNestedManyWithoutModelInput = {
-    create?: XOR<PostCreateWithoutModelInput, PostUncheckedCreateWithoutModelInput> | PostCreateWithoutModelInput[] | PostUncheckedCreateWithoutModelInput[]
-    connectOrCreate?: PostCreateOrConnectWithoutModelInput | PostCreateOrConnectWithoutModelInput[]
-    createMany?: PostCreateManyModelInputEnvelope
+  export type PostCreateNestedManyWithoutModelsInput = {
+    create?: XOR<PostCreateWithoutModelsInput, PostUncheckedCreateWithoutModelsInput> | PostCreateWithoutModelsInput[] | PostUncheckedCreateWithoutModelsInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutModelsInput | PostCreateOrConnectWithoutModelsInput[]
     connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
   }
 
-  export type PostUncheckedCreateNestedManyWithoutModelInput = {
-    create?: XOR<PostCreateWithoutModelInput, PostUncheckedCreateWithoutModelInput> | PostCreateWithoutModelInput[] | PostUncheckedCreateWithoutModelInput[]
-    connectOrCreate?: PostCreateOrConnectWithoutModelInput | PostCreateOrConnectWithoutModelInput[]
-    createMany?: PostCreateManyModelInputEnvelope
+  export type PostUncheckedCreateNestedManyWithoutModelsInput = {
+    create?: XOR<PostCreateWithoutModelsInput, PostUncheckedCreateWithoutModelsInput> | PostCreateWithoutModelsInput[] | PostUncheckedCreateWithoutModelsInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutModelsInput | PostCreateOrConnectWithoutModelsInput[]
     connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
   }
 
@@ -7157,31 +7202,29 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutModelsInput, UserUpdateWithoutModelsInput>, UserUncheckedUpdateWithoutModelsInput>
   }
 
-  export type PostUpdateManyWithoutModelNestedInput = {
-    create?: XOR<PostCreateWithoutModelInput, PostUncheckedCreateWithoutModelInput> | PostCreateWithoutModelInput[] | PostUncheckedCreateWithoutModelInput[]
-    connectOrCreate?: PostCreateOrConnectWithoutModelInput | PostCreateOrConnectWithoutModelInput[]
-    upsert?: PostUpsertWithWhereUniqueWithoutModelInput | PostUpsertWithWhereUniqueWithoutModelInput[]
-    createMany?: PostCreateManyModelInputEnvelope
+  export type PostUpdateManyWithoutModelsNestedInput = {
+    create?: XOR<PostCreateWithoutModelsInput, PostUncheckedCreateWithoutModelsInput> | PostCreateWithoutModelsInput[] | PostUncheckedCreateWithoutModelsInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutModelsInput | PostCreateOrConnectWithoutModelsInput[]
+    upsert?: PostUpsertWithWhereUniqueWithoutModelsInput | PostUpsertWithWhereUniqueWithoutModelsInput[]
     set?: PostWhereUniqueInput | PostWhereUniqueInput[]
     disconnect?: PostWhereUniqueInput | PostWhereUniqueInput[]
     delete?: PostWhereUniqueInput | PostWhereUniqueInput[]
     connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
-    update?: PostUpdateWithWhereUniqueWithoutModelInput | PostUpdateWithWhereUniqueWithoutModelInput[]
-    updateMany?: PostUpdateManyWithWhereWithoutModelInput | PostUpdateManyWithWhereWithoutModelInput[]
+    update?: PostUpdateWithWhereUniqueWithoutModelsInput | PostUpdateWithWhereUniqueWithoutModelsInput[]
+    updateMany?: PostUpdateManyWithWhereWithoutModelsInput | PostUpdateManyWithWhereWithoutModelsInput[]
     deleteMany?: PostScalarWhereInput | PostScalarWhereInput[]
   }
 
-  export type PostUncheckedUpdateManyWithoutModelNestedInput = {
-    create?: XOR<PostCreateWithoutModelInput, PostUncheckedCreateWithoutModelInput> | PostCreateWithoutModelInput[] | PostUncheckedCreateWithoutModelInput[]
-    connectOrCreate?: PostCreateOrConnectWithoutModelInput | PostCreateOrConnectWithoutModelInput[]
-    upsert?: PostUpsertWithWhereUniqueWithoutModelInput | PostUpsertWithWhereUniqueWithoutModelInput[]
-    createMany?: PostCreateManyModelInputEnvelope
+  export type PostUncheckedUpdateManyWithoutModelsNestedInput = {
+    create?: XOR<PostCreateWithoutModelsInput, PostUncheckedCreateWithoutModelsInput> | PostCreateWithoutModelsInput[] | PostUncheckedCreateWithoutModelsInput[]
+    connectOrCreate?: PostCreateOrConnectWithoutModelsInput | PostCreateOrConnectWithoutModelsInput[]
+    upsert?: PostUpsertWithWhereUniqueWithoutModelsInput | PostUpsertWithWhereUniqueWithoutModelsInput[]
     set?: PostWhereUniqueInput | PostWhereUniqueInput[]
     disconnect?: PostWhereUniqueInput | PostWhereUniqueInput[]
     delete?: PostWhereUniqueInput | PostWhereUniqueInput[]
     connect?: PostWhereUniqueInput | PostWhereUniqueInput[]
-    update?: PostUpdateWithWhereUniqueWithoutModelInput | PostUpdateWithWhereUniqueWithoutModelInput[]
-    updateMany?: PostUpdateManyWithWhereWithoutModelInput | PostUpdateManyWithWhereWithoutModelInput[]
+    update?: PostUpdateWithWhereUniqueWithoutModelsInput | PostUpdateWithWhereUniqueWithoutModelsInput[]
+    updateMany?: PostUpdateManyWithWhereWithoutModelsInput | PostUpdateManyWithWhereWithoutModelsInput[]
     deleteMany?: PostScalarWhereInput | PostScalarWhereInput[]
   }
 
@@ -7193,20 +7236,30 @@ export namespace Prisma {
     set: string[]
   }
 
+  export type PostCreatepdfIdsInput = {
+    set: string[]
+  }
+
   export type PostCreaterelatedPostsInput = {
     set: string[]
   }
 
-  export type ModelCreateNestedOneWithoutPostsInput = {
-    create?: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput>
-    connectOrCreate?: ModelCreateOrConnectWithoutPostsInput
-    connect?: ModelWhereUniqueInput
+  export type ModelCreateNestedManyWithoutPostsInput = {
+    create?: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput> | ModelCreateWithoutPostsInput[] | ModelUncheckedCreateWithoutPostsInput[]
+    connectOrCreate?: ModelCreateOrConnectWithoutPostsInput | ModelCreateOrConnectWithoutPostsInput[]
+    connect?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
   }
 
   export type UserCreateNestedOneWithoutPostsInput = {
     create?: XOR<UserCreateWithoutPostsInput, UserUncheckedCreateWithoutPostsInput>
     connectOrCreate?: UserCreateOrConnectWithoutPostsInput
     connect?: UserWhereUniqueInput
+  }
+
+  export type ModelUncheckedCreateNestedManyWithoutPostsInput = {
+    create?: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput> | ModelCreateWithoutPostsInput[] | ModelUncheckedCreateWithoutPostsInput[]
+    connectOrCreate?: ModelCreateOrConnectWithoutPostsInput | ModelCreateOrConnectWithoutPostsInput[]
+    connect?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
   }
 
   export type PostUpdatekeywordsInput = {
@@ -7219,17 +7272,27 @@ export namespace Prisma {
     push?: string | string[]
   }
 
+  export type PostUpdatepdfIdsInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
   export type PostUpdaterelatedPostsInput = {
     set?: string[]
     push?: string | string[]
   }
 
-  export type ModelUpdateOneRequiredWithoutPostsNestedInput = {
-    create?: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput>
-    connectOrCreate?: ModelCreateOrConnectWithoutPostsInput
-    upsert?: ModelUpsertWithoutPostsInput
-    connect?: ModelWhereUniqueInput
-    update?: XOR<XOR<ModelUpdateToOneWithWhereWithoutPostsInput, ModelUpdateWithoutPostsInput>, ModelUncheckedUpdateWithoutPostsInput>
+  export type ModelUpdateManyWithoutPostsNestedInput = {
+    create?: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput> | ModelCreateWithoutPostsInput[] | ModelUncheckedCreateWithoutPostsInput[]
+    connectOrCreate?: ModelCreateOrConnectWithoutPostsInput | ModelCreateOrConnectWithoutPostsInput[]
+    upsert?: ModelUpsertWithWhereUniqueWithoutPostsInput | ModelUpsertWithWhereUniqueWithoutPostsInput[]
+    set?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    disconnect?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    delete?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    connect?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    update?: ModelUpdateWithWhereUniqueWithoutPostsInput | ModelUpdateWithWhereUniqueWithoutPostsInput[]
+    updateMany?: ModelUpdateManyWithWhereWithoutPostsInput | ModelUpdateManyWithWhereWithoutPostsInput[]
+    deleteMany?: ModelScalarWhereInput | ModelScalarWhereInput[]
   }
 
   export type UserUpdateOneRequiredWithoutPostsNestedInput = {
@@ -7238,6 +7301,19 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutPostsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPostsInput, UserUpdateWithoutPostsInput>, UserUncheckedUpdateWithoutPostsInput>
+  }
+
+  export type ModelUncheckedUpdateManyWithoutPostsNestedInput = {
+    create?: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput> | ModelCreateWithoutPostsInput[] | ModelUncheckedCreateWithoutPostsInput[]
+    connectOrCreate?: ModelCreateOrConnectWithoutPostsInput | ModelCreateOrConnectWithoutPostsInput[]
+    upsert?: ModelUpsertWithWhereUniqueWithoutPostsInput | ModelUpsertWithWhereUniqueWithoutPostsInput[]
+    set?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    disconnect?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    delete?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    connect?: ModelWhereUniqueInput | ModelWhereUniqueInput[]
+    update?: ModelUpdateWithWhereUniqueWithoutPostsInput | ModelUpdateWithWhereUniqueWithoutPostsInput[]
+    updateMany?: ModelUpdateManyWithWhereWithoutPostsInput | ModelUpdateManyWithWhereWithoutPostsInput[]
+    deleteMany?: ModelScalarWhereInput | ModelScalarWhereInput[]
   }
 
   export type UserCreateteamInput = {
@@ -7636,7 +7712,7 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutModelsInput, UserUncheckedCreateWithoutModelsInput>
   }
 
-  export type PostCreateWithoutModelInput = {
+  export type PostCreateWithoutModelsInput = {
     id?: string
     shortId: string
     title: string
@@ -7646,6 +7722,7 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
+    pdfIds?: PostCreatepdfIdsInput | string[]
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
     team?: string | null
@@ -7654,7 +7731,7 @@ export namespace Prisma {
     uploader: UserCreateNestedOneWithoutPostsInput
   }
 
-  export type PostUncheckedCreateWithoutModelInput = {
+  export type PostUncheckedCreateWithoutModelsInput = {
     id?: string
     shortId: string
     title: string
@@ -7664,6 +7741,7 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
+    pdfIds?: PostCreatepdfIdsInput | string[]
     uploaderId: string
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
@@ -7672,14 +7750,9 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type PostCreateOrConnectWithoutModelInput = {
+  export type PostCreateOrConnectWithoutModelsInput = {
     where: PostWhereUniqueInput
-    create: XOR<PostCreateWithoutModelInput, PostUncheckedCreateWithoutModelInput>
-  }
-
-  export type PostCreateManyModelInputEnvelope = {
-    data: PostCreateManyModelInput | PostCreateManyModelInput[]
-    skipDuplicates?: boolean
+    create: XOR<PostCreateWithoutModelsInput, PostUncheckedCreateWithoutModelsInput>
   }
 
   export type UserUpsertWithoutModelsInput = {
@@ -7721,20 +7794,20 @@ export namespace Prisma {
     posts?: PostUncheckedUpdateManyWithoutUploaderNestedInput
   }
 
-  export type PostUpsertWithWhereUniqueWithoutModelInput = {
+  export type PostUpsertWithWhereUniqueWithoutModelsInput = {
     where: PostWhereUniqueInput
-    update: XOR<PostUpdateWithoutModelInput, PostUncheckedUpdateWithoutModelInput>
-    create: XOR<PostCreateWithoutModelInput, PostUncheckedCreateWithoutModelInput>
+    update: XOR<PostUpdateWithoutModelsInput, PostUncheckedUpdateWithoutModelsInput>
+    create: XOR<PostCreateWithoutModelsInput, PostUncheckedCreateWithoutModelsInput>
   }
 
-  export type PostUpdateWithWhereUniqueWithoutModelInput = {
+  export type PostUpdateWithWhereUniqueWithoutModelsInput = {
     where: PostWhereUniqueInput
-    data: XOR<PostUpdateWithoutModelInput, PostUncheckedUpdateWithoutModelInput>
+    data: XOR<PostUpdateWithoutModelsInput, PostUncheckedUpdateWithoutModelsInput>
   }
 
-  export type PostUpdateManyWithWhereWithoutModelInput = {
+  export type PostUpdateManyWithWhereWithoutModelsInput = {
     where: PostScalarWhereInput
-    data: XOR<PostUpdateManyMutationInput, PostUncheckedUpdateManyWithoutModelInput>
+    data: XOR<PostUpdateManyMutationInput, PostUncheckedUpdateManyWithoutModelsInput>
   }
 
   export type PostScalarWhereInput = {
@@ -7750,7 +7823,7 @@ export namespace Prisma {
     keywords?: StringNullableListFilter<"Post">
     coverImage?: StringFilter<"Post"> | string
     images?: StringNullableListFilter<"Post">
-    modelId?: StringFilter<"Post"> | string
+    pdfIds?: StringNullableListFilter<"Post">
     uploaderId?: StringFilter<"Post"> | string
     relatedPosts?: StringNullableListFilter<"Post">
     permission?: StringFilter<"Post"> | string
@@ -7823,41 +7896,36 @@ export namespace Prisma {
     create: XOR<UserCreateWithoutPostsInput, UserUncheckedCreateWithoutPostsInput>
   }
 
-  export type ModelUpsertWithoutPostsInput = {
+  export type ModelUpsertWithWhereUniqueWithoutPostsInput = {
+    where: ModelWhereUniqueInput
     update: XOR<ModelUpdateWithoutPostsInput, ModelUncheckedUpdateWithoutPostsInput>
     create: XOR<ModelCreateWithoutPostsInput, ModelUncheckedCreateWithoutPostsInput>
-    where?: ModelWhereInput
   }
 
-  export type ModelUpdateToOneWithWhereWithoutPostsInput = {
-    where?: ModelWhereInput
+  export type ModelUpdateWithWhereUniqueWithoutPostsInput = {
+    where: ModelWhereUniqueInput
     data: XOR<ModelUpdateWithoutPostsInput, ModelUncheckedUpdateWithoutPostsInput>
   }
 
-  export type ModelUpdateWithoutPostsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    shortId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    fileId?: StringFieldUpdateOperationsInput | string
-    size?: StringFieldUpdateOperationsInput | string
-    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    uploader?: UserUpdateOneRequiredWithoutModelsNestedInput
+  export type ModelUpdateManyWithWhereWithoutPostsInput = {
+    where: ModelScalarWhereInput
+    data: XOR<ModelUpdateManyMutationInput, ModelUncheckedUpdateManyWithoutPostsInput>
   }
 
-  export type ModelUncheckedUpdateWithoutPostsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    shortId?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    fileId?: StringFieldUpdateOperationsInput | string
-    uploaderId?: StringFieldUpdateOperationsInput | string
-    size?: StringFieldUpdateOperationsInput | string
-    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
-    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type ModelScalarWhereInput = {
+    AND?: ModelScalarWhereInput | ModelScalarWhereInput[]
+    OR?: ModelScalarWhereInput[]
+    NOT?: ModelScalarWhereInput | ModelScalarWhereInput[]
+    id?: StringFilter<"Model"> | string
+    shortId?: StringFilter<"Model"> | string
+    name?: StringFilter<"Model"> | string
+    fileId?: StringFilter<"Model"> | string
+    uploaderId?: StringFilter<"Model"> | string
+    size?: StringFilter<"Model"> | string
+    status?: EnumProcessStatusFilter<"Model"> | $Enums.ProcessStatus
+    errorMessage?: StringNullableFilter<"Model"> | string | null
+    createdAt?: DateTimeFilter<"Model"> | Date | string
+    updatedAt?: DateTimeFilter<"Model"> | Date | string
   }
 
   export type UserUpsertWithoutPostsInput = {
@@ -7937,7 +8005,7 @@ export namespace Prisma {
     errorMessage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    posts?: PostCreateNestedManyWithoutModelInput
+    posts?: PostCreateNestedManyWithoutModelsInput
   }
 
   export type ModelUncheckedCreateWithoutUploaderInput = {
@@ -7950,7 +8018,7 @@ export namespace Prisma {
     errorMessage?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    posts?: PostUncheckedCreateNestedManyWithoutModelInput
+    posts?: PostUncheckedCreateNestedManyWithoutModelsInput
   }
 
   export type ModelCreateOrConnectWithoutUploaderInput = {
@@ -7973,12 +8041,13 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
+    pdfIds?: PostCreatepdfIdsInput | string[]
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
     team?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    model: ModelCreateNestedOneWithoutPostsInput
+    models?: ModelCreateNestedManyWithoutPostsInput
   }
 
   export type PostUncheckedCreateWithoutUploaderInput = {
@@ -7991,12 +8060,13 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
-    modelId: string
+    pdfIds?: PostCreatepdfIdsInput | string[]
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
     team?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    models?: ModelUncheckedCreateNestedManyWithoutPostsInput
   }
 
   export type PostCreateOrConnectWithoutUploaderInput = {
@@ -8054,22 +8124,6 @@ export namespace Prisma {
     data: XOR<ModelUpdateManyMutationInput, ModelUncheckedUpdateManyWithoutUploaderInput>
   }
 
-  export type ModelScalarWhereInput = {
-    AND?: ModelScalarWhereInput | ModelScalarWhereInput[]
-    OR?: ModelScalarWhereInput[]
-    NOT?: ModelScalarWhereInput | ModelScalarWhereInput[]
-    id?: StringFilter<"Model"> | string
-    shortId?: StringFilter<"Model"> | string
-    name?: StringFilter<"Model"> | string
-    fileId?: StringFilter<"Model"> | string
-    uploaderId?: StringFilter<"Model"> | string
-    size?: StringFilter<"Model"> | string
-    status?: EnumProcessStatusFilter<"Model"> | $Enums.ProcessStatus
-    errorMessage?: StringNullableFilter<"Model"> | string | null
-    createdAt?: DateTimeFilter<"Model"> | Date | string
-    updatedAt?: DateTimeFilter<"Model"> | Date | string
-  }
-
   export type PostUpsertWithWhereUniqueWithoutUploaderInput = {
     where: PostWhereUniqueInput
     update: XOR<PostUpdateWithoutUploaderInput, PostUncheckedUpdateWithoutUploaderInput>
@@ -8086,25 +8140,7 @@ export namespace Prisma {
     data: XOR<PostUpdateManyMutationInput, PostUncheckedUpdateManyWithoutUploaderInput>
   }
 
-  export type PostCreateManyModelInput = {
-    id?: string
-    shortId: string
-    title: string
-    category: string
-    description?: string | null
-    type: string
-    keywords?: PostCreatekeywordsInput | string[]
-    coverImage: string
-    images?: PostCreateimagesInput | string[]
-    uploaderId: string
-    relatedPosts?: PostCreaterelatedPostsInput | string[]
-    permission: string
-    team?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type PostUpdateWithoutModelInput = {
+  export type PostUpdateWithoutModelsInput = {
     id?: StringFieldUpdateOperationsInput | string
     shortId?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -8114,6 +8150,7 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
@@ -8122,7 +8159,7 @@ export namespace Prisma {
     uploader?: UserUpdateOneRequiredWithoutPostsNestedInput
   }
 
-  export type PostUncheckedUpdateWithoutModelInput = {
+  export type PostUncheckedUpdateWithoutModelsInput = {
     id?: StringFieldUpdateOperationsInput | string
     shortId?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -8132,6 +8169,7 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     uploaderId?: StringFieldUpdateOperationsInput | string
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
@@ -8140,7 +8178,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type PostUncheckedUpdateManyWithoutModelInput = {
+  export type PostUncheckedUpdateManyWithoutModelsInput = {
     id?: StringFieldUpdateOperationsInput | string
     shortId?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -8150,10 +8188,50 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     uploaderId?: StringFieldUpdateOperationsInput | string
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ModelUpdateWithoutPostsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shortId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    size?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    uploader?: UserUpdateOneRequiredWithoutModelsNestedInput
+  }
+
+  export type ModelUncheckedUpdateWithoutPostsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shortId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    uploaderId?: StringFieldUpdateOperationsInput | string
+    size?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ModelUncheckedUpdateManyWithoutPostsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    shortId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    fileId?: StringFieldUpdateOperationsInput | string
+    uploaderId?: StringFieldUpdateOperationsInput | string
+    size?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcessStatusFieldUpdateOperationsInput | $Enums.ProcessStatus
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -8189,7 +8267,7 @@ export namespace Prisma {
     keywords?: PostCreatekeywordsInput | string[]
     coverImage: string
     images?: PostCreateimagesInput | string[]
-    modelId: string
+    pdfIds?: PostCreatepdfIdsInput | string[]
     relatedPosts?: PostCreaterelatedPostsInput | string[]
     permission: string
     team?: string | null
@@ -8234,7 +8312,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    posts?: PostUpdateManyWithoutModelNestedInput
+    posts?: PostUpdateManyWithoutModelsNestedInput
   }
 
   export type ModelUncheckedUpdateWithoutUploaderInput = {
@@ -8247,7 +8325,7 @@ export namespace Prisma {
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    posts?: PostUncheckedUpdateManyWithoutModelNestedInput
+    posts?: PostUncheckedUpdateManyWithoutModelsNestedInput
   }
 
   export type ModelUncheckedUpdateManyWithoutUploaderInput = {
@@ -8272,12 +8350,13 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    model?: ModelUpdateOneRequiredWithoutPostsNestedInput
+    models?: ModelUpdateManyWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateWithoutUploaderInput = {
@@ -8290,12 +8369,13 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
-    modelId?: StringFieldUpdateOperationsInput | string
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    models?: ModelUncheckedUpdateManyWithoutPostsNestedInput
   }
 
   export type PostUncheckedUpdateManyWithoutUploaderInput = {
@@ -8308,7 +8388,7 @@ export namespace Prisma {
     keywords?: PostUpdatekeywordsInput | string[]
     coverImage?: StringFieldUpdateOperationsInput | string
     images?: PostUpdateimagesInput | string[]
-    modelId?: StringFieldUpdateOperationsInput | string
+    pdfIds?: PostUpdatepdfIdsInput | string[]
     relatedPosts?: PostUpdaterelatedPostsInput | string[]
     permission?: StringFieldUpdateOperationsInput | string
     team?: NullableStringFieldUpdateOperationsInput | string | null

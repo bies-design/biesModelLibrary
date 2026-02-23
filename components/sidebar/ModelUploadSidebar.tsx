@@ -75,6 +75,8 @@ const ModelUploadSidebar = ({
   const {isOpen, onOpen, onOpenChange} = useDisclosure();// 控制 Modal 開關的 Hook
   const [modelToDelete, setModelToDelete] = useState<string | null>(null);//暫存「當前要刪除的模型Name」
   const [modelIdToDelete, setModelIdToDelete] = useState<string | null>(null);//暫存「當前要刪除的模型id」
+  const [isLoadedModelsExpanded, setIsLoadedModelsExpanded] = useState<boolean>(true);
+
   // 撈取model資料
   const fetchUserModels = async () => {
     setIsLoading(true);
@@ -189,6 +191,14 @@ const ModelUploadSidebar = ({
       console.log(`📦 模型下載成功: ${modelName}, 大小: ${buffer.byteLength}`);
 
       onLoadModel(buffer, modelName);
+      onSelectFile({
+        id:fileId,
+        // 騙術：給它一個同名的空檔案 (內容是空陣列 [])
+        file: new File([], modelName, { type: 'application/octet-stream' }),
+        type: '3d',
+        name:modelName,
+        fileid:fileId,
+      })
     }catch(error){
       console.error("載入失敗:", error);
     }finally{
@@ -336,7 +346,7 @@ const ModelUploadSidebar = ({
       {/* 已載入列表 (Loaded Models) */}
       <div className="flex-grow overflow-y-auto p-4 border-t border-[#FFFFFF1A]">
         <div className='flex items-center justify-between px-2'>
-          <p className="font-inter text-[#A1A1AA] text-xs mb-2 uppercase">Loaded Models</p>
+          <p className="font-inter text-[#A1A1AA] text-xs mb-2 uppercase">Cloud Models</p>
           <div className='flex gap-2'>
             <Tooltip content={`Refresh`} placement='bottom'>
               <button
@@ -376,7 +386,7 @@ const ModelUploadSidebar = ({
 
                   onSelectFile({
                     id:fileItem.id,
-                    // 🔥 騙術：給它一個同名的空檔案 (內容是空陣列 [])
+                    // 騙術：給它一個同名的空檔案 (內容是空陣列 [])
                     file: new File([], fileItem.name, { type: 'application/octet-stream' }),
                     type: isPdf ? 'pdf' : '3d',
                     name:fileItem.name,
@@ -385,7 +395,7 @@ const ModelUploadSidebar = ({
                 }
               }
                 className={`group flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                  selectedFileId === fileItem.id 
+                  selectedFileId === fileItem.fileId 
                   ? 'bg-[#D70036] text-white shadow-lg' 
                   : 'bg-[#27272A] text-gray-300 hover:bg-[#3F3F46]'
                 }`}

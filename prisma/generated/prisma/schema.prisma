@@ -81,11 +81,12 @@ model Post {
   images     String[]
 
   // 關聯到 Model (3D 檔案)
-  modelId String
-  model   Model  @relation(fields: [modelId], references: [id])
+  models Model[]
 
+  pdfIds     String[]
+  // pdf Pdf @relation(fields: [pdfId], references: [id])
   uploaderId String
-  uploader   User   @relation(fields: [uploaderId], references: [id])
+  uploader   User     @relation(fields: [uploaderId], references: [id])
 
   // 相關文章 ID (簡易關聯)
   relatedPosts String[]

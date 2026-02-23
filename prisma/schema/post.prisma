@@ -14,10 +14,9 @@ model Post {
   images     String[]
 
   // 關聯到 Model (3D 檔案)
-  modelId String?
-  model   Model?  @relation(fields: [modelId], references: [id])
+  models Model[]
 
-  pdfId String?
+  pdfIds String[]
   // pdf Pdf @relation(fields: [pdfId], references: [id])
   uploaderId String
   uploader   User   @relation(fields: [uploaderId], references: [id])

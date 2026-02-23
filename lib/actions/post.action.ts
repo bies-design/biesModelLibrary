@@ -5,12 +5,15 @@ import { auth } from "@/auth"; // 你的 auth 設定
 import { Metadata } from "@/components/forms/MetadataForm";
 import { redirect } from "next/navigation";
 import { nanoid } from "nanoid";
+import { connect } from "http2";
+import { FileItem } from "@/app/(uploadAndDashboard)/upload/page";
 
 interface CreatePostParams {
     metadata: Metadata;
     coverImageKey: string | null;
     imageKeys: string[];
-    modelId: string;
+    modelIds?: string[];
+    pdfIds?: string[];
 }
 
 export async function create3DPost(params: CreatePostParams) {
@@ -19,7 +22,13 @@ export async function create3DPost(params: CreatePostParams) {
     if (!session?.user?.id) {
         return { success: false, error: "Unauthorized" };
     }
-
+    const { 
+        metadata, 
+        coverImageKey, 
+        imageKeys, 
+        modelIds = [], 
+        pdfIds = [] 
+    } = params;
     try {
         // 寫入 PostgreSQL
         const newPost = await prisma.post.create({
@@ -33,9 +42,12 @@ export async function create3DPost(params: CreatePostParams) {
             coverImage: params.coverImageKey!,
             images: params.imageKeys,
             
-            modelId: params.modelId, // 關聯選中的模型
+            models:{
+                connect: modelIds.map(id => ({ id }))
+            },
+            pdfIds: params.pdfIds,
             uploaderId: session.user.id,
-
+            
             permission: params.metadata.permission,
             team: params.metadata.team === "none" ? null : params.metadata.team,
         },

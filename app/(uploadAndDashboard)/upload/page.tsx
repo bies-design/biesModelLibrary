@@ -8,6 +8,7 @@ import { PDFViewerRef } from '@/components/viewer/PDFViewerInternal';
 import ModelUploadSidebar from '@/components/sidebar/ModelUploadSidebar';
 import MetadataForm, { Metadata, ImageFile } from '@/components/forms/MetadataForm';
 import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Model,UIModel } from '@/types/upload';
 import { create3DPost } from '@/lib/actions/post.action';
@@ -26,6 +27,7 @@ const Upload = () => {
     const [step, setStep] = useState(1);
     const [uploadedFiles, setUploadedFiles] = useState<FileItem[]>([]);
     const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+    const [loadedFiles, setLoadedFiles] = useState<FileItem[]>([]);
     const [coverImage, setCoverImage] = useState<string | null>(null);
     const [IFCProcessingStatus, setIFCProcessingStatus] = useState<{
         isIFCProcessing: boolean;
@@ -47,6 +49,7 @@ const Upload = () => {
     const viewerRef = useRef<Viewer3DRef>(null);
     const pdfRef = useRef<PDFViewerRef>(null);
 
+    const router = useRouter();
     //for breaking infinite rendering in viewer3D syncModels
     const handleIFCProcessingChange = useCallback((isIFCProcessing:boolean,fileName: string | null, progress?:number) => {
         setIFCProcessingStatus({isIFCProcessing,fileName,progress});
@@ -89,7 +92,6 @@ const Upload = () => {
                 // 如果 PDFViewer 也是回傳 Base64，建議之後也可以改成 Blob
                 screenshotUrl = await pdfRef.current.takeScreenshot();
             } else if (viewerRef.current) {
-                // 🔥 修改這裡：加上 await
                 screenshotUrl = await viewerRef.current.takeScreenshot();
             }
 
@@ -150,18 +152,18 @@ const Upload = () => {
             });
 
             console.log("2. 圖片上傳完成，寫入資料庫...", { coverKey, imageKeys });
-
+            console.warn("選中模型ID為",selectedFile.id);
             // C. 呼叫 Server Action 寫入 DB
             const result = await create3DPost({
                 metadata: metadata,
                 coverImageKey: coverKey,
                 imageKeys: imageKeys,
-                modelId: selectedFile.id, // 使用者選中的模型 ID
+                modelIds: loadedFiles.map(file => file.id), // 使用者選中模型的資料庫ID
             });
 
             if (result.success) {
                 console.log("✅ 建立成功！");
-                redirect('/'); // 或是跳轉到該 Post 頁面
+                router.push('/?status=success');
             } else {
                 throw new Error(result.error);
             }
@@ -197,7 +199,7 @@ const Upload = () => {
     };
     useEffect(() => {
         console.log(`選擇file:${selectedFile?.name}`);
-        console.log(uploadedFiles.map((a)=>(a.name)));   
+        // console.log(uploadedFiles.map((a)=>(a.name)));   
     },[selectedFile,uploadedFiles])
     
     return (
