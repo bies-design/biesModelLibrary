@@ -214,9 +214,10 @@ const MetadataForm = ({
               value: "text-white",
             }}
           >
-            <SelectItem key="architecture" className='font-inter'>Architecture</SelectItem>
-            <SelectItem key="structure" className='font-inter'>Structure</SelectItem>
-            <SelectItem key="mep" className='font-inter'>MEP</SelectItem>
+            <SelectItem key="Buildings" className='font-inter'>Buildings</SelectItem>
+            <SelectItem key="Products" className='font-inter'>Products</SelectItem>
+            <SelectItem key="Elements" className='font-inter'>Elements</SelectItem>
+            <SelectItem key="2D Drawings" className='font-inter'>2D Drawings</SelectItem>
           </Select>
         </div>
       </div>
