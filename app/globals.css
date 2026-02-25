@@ -11,7 +11,7 @@ html, body {
 @custom-variant dark (&:is(.dark *));
 
 @utility bg-amber50_darkblack {
-  @apply bg-amber-50 dark:bg-black;
+  @apply bg-amber-50 dark:bg-[#27272A];
 }
 /* --- 新增這段 --- */
 @layer utilities {
@@ -44,6 +44,15 @@ html, body {
 }
 /* for background blobs */
 @layer components {
+    .glass-panel {
+      @apply  relative border border-white/10 backdrop-blur-[20px] shadow-[inset_0px_1px_0px_0px_rgba(255,255,255,0.5),inset_0px_0px_20px_0px_rgba(255,255,255,0.05),inset_0px_-4px_6px_0px_rgba(100,200,255,0.3),0px_20px_40px_-10px_rgba(0,0,0,0.6)];
+      
+      /* 使用偽元素注入雜訊 */
+      &::before {
+        content: "";
+        @apply absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none z-0;
+      }
+    }
     .blob1 {
       @apply size-[300px] md:size-[500px] ;
       aspect-ratio: 1/1;

@@ -1,21 +1,31 @@
 //landing page
 'use client';
-import React, { useEffect } from 'react'
+import React, { useEffect,useState,useRef } from 'react'
 import Image from 'next/image'
 import Footer from '@/components/Footer';
-import ModelCard from '@/components/cards/ModelCard';
 import HeroAnimation from '@/components/animation/HeroAnimation';
 import { itemsQuery } from '../globalUse';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import PostCard from '@/components/cards/PostCard';
+import { getPostsByScroll } from '@/lib/actions/post.action';
+import { useNativeInView } from '@/hooks/useIntersectionObserver';
+import { Loader2 } from 'lucide-react';
 
 const Home = () => {
   const { data:session,status } = useSession();
   //for itemsQuery
-  const [isSelectId,setIsSelectId] = React.useState('ALL');
+  const [isSelectId,setIsSelectId] = useState('ALL');
   //for Newest Hottest Query
-  const [isQueryArrange,setIsQueryArrange] = React.useState('Newest')
+  const [isQueryArrange,setIsQueryArrange] = useState('Newest')
   const SearchParams = useSearchParams();
+  const [posts, setPosts] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null); //ref 用來綁定底部的 DOM 元素
+  const isIntersecting = useNativeInView(loadMoreRef, '400px');
+  
   useEffect(() => {
     if(SearchParams.get('status') === 'success'){
       alert("貼文上傳成功!");
@@ -24,6 +34,36 @@ const Home = () => {
       window.history.replaceState({}, '', newUrl);
     }
   },[SearchParams])
+
+  const fetchPosts = async (currentPage: number, isReset: boolean = false) => {
+    setIsLoading(true);
+    const result = await getPostsByScroll(currentPage, 9, isSelectId, isQueryArrange);
+    
+    if (result.success && result.data) {
+      if (isReset) {
+        setPosts(result.data);
+      } else {
+        setPosts((prev) => [...prev, ...result.data!]);
+      }
+      setHasMore(result.hasMore || false);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    fetchPosts(1, true);
+  }, [isSelectId, isQueryArrange]);
+  
+  // 監聽 isIntersecting 的變化來抓資料 達成無限下滑抓資料功能
+  useEffect(() => {
+    if (isIntersecting && hasMore && !isLoading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchPosts(nextPage, false);
+    }
+  }, [isIntersecting, hasMore, isLoading, page]);
 
   return (
     <div className='mt-20'>
@@ -58,7 +98,6 @@ const Home = () => {
           {/* buttons query */}
           {itemsQuery.map((item) => {
             const isSelected = isSelectId === item.id;
-
             return (
               <button 
                 //declare this is a unique button
@@ -84,7 +123,6 @@ const Home = () => {
                 
             )
           })}
-          
         </div>
         {/* Newest Hottest query buttoms */}
           <div className='flex justify-start border-4 w-[95%]'>
@@ -98,13 +136,36 @@ const Home = () => {
           <div className='overflow-hidden w-[95%] border-3 border-green-500'>
             {/* 分割容器成3等份 */}
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center border-3 border-yellow-500'>
-              {/* Display area for model cards, reder 12 when first mounted */}
-              <ModelCard selectedCategory={isSelectId}/>
+              {posts.map((post)=>(
+                <PostCard 
+                  key={post.id}
+                  dbId={post.id}
+                  shortId={post.shortId}
+                  coverImage={post.coverImage}
+                  type={post.type}
+                  title={post.title}
+                />
+                ))}
             </div>  
-            <div className='flex justify-center mt-4 mb-4 '>
-              <button className='font-abeezee bg-transparent text-[#3C3C3C] dark:text-white border-1.5 px-[12px] py-[4px] rounded-lg hover:bg-gray-300 transition'>
-                Load More
-              </button>
+            
+            {/* 下面div 進入視角觸發抓取資料 */}
+            <div ref={loadMoreRef} className='flex justify-center mt-8 mb-8 h-10'>
+              {isLoading && (
+                <div className="flex items-center gap-2 text-[#A1A1AA]">
+                  <Loader2 className="animate-spin w-5 h-5" />
+                  <span>Loading more...</span>
+                </div>
+              )}
+              {!hasMore && posts.length > 0 && (
+                <p className='text-sm text-[#5B5B5B] dark:text-[#BEBEBE] font-abeezee'>
+                  You have reached the end.
+                </p>
+              )}
+              {!hasMore && posts.length === 0 && !isLoading && (
+                <p className='text-sm text-[#5B5B5B] dark:text-[#BEBEBE] font-abeezee'>
+                  No models found in this category.
+                </p>
+              )}
             </div>
           </div>
       </div>
@@ -113,4 +174,4 @@ const Home = () => {
   );
 }
 
-export default Home
+export default Home;

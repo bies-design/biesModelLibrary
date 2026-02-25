@@ -6,7 +6,7 @@ const BackgroundBlobs = () => {
 
   return (
     <div className='fixed w-full m-0 p-0'>
-      <section className='flex justify-center items-center h-[100vh] bg-amber50_darkblack overflow-hidden'>
+      <section className='flex justify-center items-center h-screen bg-amber50_darkblack overflow-hidden'>
           <div className='blob1'></div>
           <div className='blob2'></div>
       </section>
