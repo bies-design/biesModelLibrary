@@ -1,6 +1,8 @@
 // server.js
 import path from 'path';
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });  // 用 process.cwd() 代替 __dirname
+
 console.log("DEBUG: S3_IFC_BUCKET =", process.env.S3_IFC_BUCKET); // 👈 檢查這行有沒有印出東西
 
 import express from 'express';

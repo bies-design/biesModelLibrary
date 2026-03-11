@@ -11,6 +11,10 @@ services:
             POSTGRES_USER: ${POSTGRESDB_USER}
             POSTGRES_PASSWORD: ${POSTGRESDB_PASSWORD}
             POSTGRES_DB: ${POSTGRESDB_DB}
+        networks:
+            modlib:
+                aliases:
+                    - modlib.pgsql
         volumes:
             - pgdata_local:/var/lib/postgresql/data # 資料庫存檔位置
         restart: always
@@ -22,11 +26,15 @@ services:
         image: minio/minio:latest
         command: server /data --console-address ":9001"
         ports:
-            - 9000:9000 # 程式連線用 (API)
+            # - 9000:9000 # 程式連線用 (API)
             - 9001:9001 # 你看介面用 (Console)
         environment:
             MINIO_ROOT_USER: ${S3_ACCESS_KEY}
             MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+        networks:
+            modlib:
+                aliases:
+                    - modlib.minio
         volumes:
             - minio_data_local:/data # 檔案存檔位置
         restart: always
@@ -42,9 +50,70 @@ services:
             - "6379:6379" # 讓你的 worker.js 可以透過 localhost:6379 連線
         # 開啟 AOF 持久化，防止重開機後 Queue 裡的任務消失
         command: redis-server --appendonly yes #開啟 AOF (Append Only File)，讓 Redis 把資料寫入硬碟。這樣如果你的電腦重開機，排隊中的轉檔任務不會消失。
+        networks:
+            modlib:
+                aliases:
+                    - modlib.redis
         volumes:
             - redis_data_local:/data
         restart: always
+
+#=================
+# Frontend
+#=================
+    frontend:
+        container_name: frontend-local
+        image: node:24.14.0-slim
+        working_dir: /usr/local/app
+        ports:
+            - "3000:3000"
+        command: npx dev
+        networks:
+            modlib:
+                aliases:
+                    - modlib.frontend 
+        volumes: 
+            - ./:/usr/local/app
+            # use empty anonymous volume to avoid not relating code changes in host to container
+            - /usr/local/app/ifcToFragsConverWorker
+            - /usr/local/app/tus-server
+        restart: unless-stopped
+
+#=================
+# Tus-Server
+#=================
+    tus-server:
+        container_name: tus-server-local
+        image: node:24.14.0-slim
+        working_dir: /usr/local/app2
+        ports:
+            - "1080:1080"
+        command: npx tsx tus-server/server.ts
+        networks:
+            modlib:
+                aliases:
+                    - modlib.tus-server 
+        volumes: 
+            - ./tus-server:/usr/local/app2
+        restart: unless-stopped
+
+
+#=================
+# Worker: IFC to Fragments Converter
+#=================
+    ifcToFragsConverWorker:
+        container_name: ifcToFragsConverWorker-local
+        image: node:24.14.0-slim
+        working_dir: /usr/local/app3
+        command: npx 
+        networks:
+            modlib:
+                aliases:
+                    - modlib.worker 
+        volumes: 
+            - ./ifcToFragsConverWorker:/usr/local/app3
+        restart: unless-stopped
+
 
 
 # 確保資料不會因為重開機消失
@@ -55,3 +124,8 @@ volumes:
     redis_data_local:
 #執行 docker-compose --env-file .env.local up -d
 #-d means Detached mode 在背景執行這些容器，不要佔用我的終端機（Terminal）畫面
+networks:
+    modlib:
+        external: true
+        name: modlib-bridge
+        attachable: true
