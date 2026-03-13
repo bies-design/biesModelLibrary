@@ -35,6 +35,11 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
     // 用來快速反查 ID 的 Ref (不會觸發渲染，專門給 Socket 用)
     const tusIdMap = React.useRef<Record<string,{id:string, name:string}>>({});
 
+    // Tus Server Configuration: Remote
+    const TusServHost: string = String(process.env.NEXT_PUBLIC_TUS_SERVER_HOST || "localhost");
+    const TusServPortStr: string = String(process.env.NEXT_PUBLIC_TUS_SERVER_PORT);
+    const TusServPortNum = parseInt(TusServPortStr || "3003", 10); // 我們讓這個服務預設跑在 3003 port
+
     // 1. 初始化 Uppy
     const [uppy] = useState(() => {
         const uppyInstance = new Uppy({
@@ -42,9 +47,8 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
         autoProceed: true,
         restrictions: { allowedFileTypes: ['.ifc'] },
         });
-
         uppyInstance.use(Tus, {
-        endpoint: "http://localhost:3003/files/", // 指向你的 Tus Server
+        endpoint: "http://" + TusServHost + ":" + TusServPortNum + "/files/", // 指向你的 Tus Server
         chunkSize: 5 * 1024 * 1024,
         retryDelays: [0, 1000, 3000, 5000],
         removeFingerprintOnSuccess: true,
@@ -55,10 +59,19 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. WebSocket 監聽 (處理轉檔通知)
     useEffect(() => {
-        const socket: Socket = io("http://localhost:3003");
+        const listen2TusServUrl = "http://" + TusServHost + ":" + TusServPortNum;
+        const socket: Socket = io(
+            listen2TusServUrl, //default url: "http://localhost:3003"
+            {
+                autoConnect: true, // 關閉自動發起連線
+                transports: ["websocket", "polling"]
+            }
+        );
 
+        // 連線建立成功
         socket.on("connect", () => {
-        console.log("🔌 Socket connected");
+            console.log("🔌 Socket connected");
+
         });
         // 監聽進度更新
         socket.on("conversion-progress", (data: { fileId: string, progress: number }) => {
