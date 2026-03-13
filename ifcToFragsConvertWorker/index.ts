@@ -7,7 +7,7 @@ import cors from 'cors';
 import * as Minio from 'minio';
 import { Job, JobScheduler, Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
-import { PrismaClient } from '../prisma/generated/prisma/client';
+import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 // 引入核心套件 (ESM)
@@ -25,17 +25,21 @@ const adapter = new PrismaPg({ connectionString: process.env.POSTGRESDB_URI});
 const prisma = new PrismaClient({ adapter });
 
 // === Redis 連線設定 ===
-// 這是 BullMQ 用來連線 Redis 的設定
+// 這是 BullMQ 用來連線 Redis 
+const redisEndpoint: string = String(process.env.REDIS_HOST || 'localhost');
+const redisportStr: string = String(process.env.REDIS_PORT);
 const redisConnection = new IORedis({
-    host: 'localhost',
-    port: 6379,
+    host: redisEndpoint,
+    port: parseInt(redisportStr || '6379', 10),
     maxRetriesPerRequest: null, // BullMQ 要求必須設為 null
 })
 
 // === 1. 初始化 MinIO 客戶端 ===
+const s3Endpoint: string = String(process.env.S3_HOST || 'localhost');
+const s3portStr: string = String(process.env.S3_PORT); 
 const minioClient = new Minio.Client({
-    endPoint: 'localhost',
-    port: 9000,
+    endPoint: s3Endpoint,               // 沒有 http:// or https:// 前墜，直接主機名稱或 IP
+    port: parseInt(s3portStr || '9000', 10),
     useSSL: false,
     accessKey: process.env.S3_ACCESS_KEY,
     secretKey: process.env.S3_SECRET_KEY
@@ -48,12 +52,16 @@ const FRAG_BUCKET = process.env.S3_FRAGS_BUCKET;
 const serializer = new FRAGS.IfcImporter();
 serializer.wasm.path = "/"
 
+// bull module 是直接輔助node 使用和管理 Redis I/O 
 // 這個 Queue 用來讓 Webhook 把任務丟進去
-const conversionQueue = new Queue('ifc-conversion-queue', { 
+// 名稱按照ENV 設置，tus-server 和 ifc-convert-frags-server 同步
+const ifcConversionQueue4jobs = String(process.env.IFC_CONVERSION_Q);
+const conversionQueue = new Queue(ifcConversionQueue4jobs || 'ifc-conversion-queue', { 
     connection: redisConnection 
 });
 
-const PORT = 3005;
+const str_Ifc2FragsConvertPort = String(process.env.IFC_FRAGS_CONVERT_WORKER_PORT);
+const PORT = parseInt(str_Ifc2FragsConvertPort || "3005");
 
 async function executeConversionTask(job:any, fileKey:any, fileName:any, dbId:any) {
     console.log(`🚀 [Job Start] 開始處理: ${fileName} (Key: ${fileKey})(DB_ID:${dbId})`);
@@ -148,9 +156,11 @@ async function executeConversionTask(job:any, fileKey:any, fileName:any, dbId:an
     return { fileKey, fileName, fragKey, totalSize }; // 回傳結果給 Worker 事件
 }
 
-// 這是真正會在背景「一個接一個」執行任務的工人
-// 會去檢查redis還有沒有工作
-const worker = new Worker('ifc-conversion-queue', async (job) => {
+// bull module 是直接輔助node 使用和管理 Redis I/O 
+// 會去檢查redis還有沒有工作，並在背景「一個接一個」執行任務；如同工人一樣
+// 名稱按照ENV 設置，tus-server 和 ifc-convert-frags-server 同步
+const ifcConversionQueue2Work = String(process.env.IFC_CONVERSION_Q);
+const worker = new Worker(ifcConversionQueue2Work || 'ifc-conversion-queue', async (job) => {
     // job.data 包含我們在 Webhook 裡丟進去的 { fileKey, fileName }
     const { fileKey, fileName, dbId } = job.data;
     
@@ -167,10 +177,12 @@ const worker = new Worker('ifc-conversion-queue', async (job) => {
 // 成功時通知
 worker.on('completed', async (job, result) => {
     const { fileKey, fileName } = job.data;
-    console.log(`📞 [Worker] Job ${job.id} 完成，通知 Server...`);
+    console.log(`📞 [Worker] Job ${job.id} 完成，通知 Tus Server...`);
 
     try {
-        await fetch('http://localhost:3003/notify/done', {
+        const tusServUrl = "http://" + String(process.env.TUS_SERVER_HOST) +
+         ":" + String(process.env.TUS_SERVER_PORT) + "/notify/done";
+        await fetch(tusServUrl || 'http://localhost:3003/notify/done', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -205,7 +217,9 @@ worker.on('failed', async (job, err) => {
         }
     }
     try {
-        await fetch('http://localhost:3003/notify/done', {
+        const tusServUrl = "http://" + String(process.env.TUS_SERVER_HOST) +
+         ":" + String(process.env.TUS_SERVER_PORT) + "/notify/done";
+        await fetch(tusServUrl || 'http://localhost:3003/notify/done', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -261,6 +275,15 @@ app.post('/webhook/convert', async(req, res) => {
         console.error("❌ 無法加入佇列:", err);
         res.status(500).send({ error: 'Queue Error' });
     }
+});
+
+// 拒絕其他所有請求 (GET, POST, etc.)
+app.all(/(.*)/, (req, res) => {
+    res.status(403).json({
+        success: false,
+        message: `${process.env.IFC_FRAGS_CONVERT_WORKER_HOST} 無法受理此請求 (Request Not Accepted)`,
+        timestamp: new Date().toISOString()
+    });
 });
 
 app.listen(PORT, () => {

@@ -1,0 +1,32 @@
+// prisma/schema/post.prisma
+
+model Post {
+  id       String @id @default(uuid())
+  shortId  String @unique
+  title    String
+  category String
+  description String?
+  type     String
+
+  // PostgreSQL 的原生陣列功能
+  keywords   String[]
+  coverImage String
+  images     String[]
+
+  // 關聯到 Model (3D 檔案)
+  models Model[]
+
+  pdfIds Pdf[]
+  // pdf Pdf @relation(fields: [pdfId], references: [id])
+  uploaderId String
+  uploader   User   @relation(fields: [uploaderId], references: [id])
+
+  // 相關文章 ID (簡易關聯)
+  relatedPosts String[]
+
+  permission String
+  team       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -15,8 +15,9 @@ import { Server as SocketServer } from 'socket.io';
 import { QueueEvents } from 'bullmq'; 
 import IORedis from 'ioredis';
 import {nanoid} from 'nanoid';
-import { PrismaClient } from '../prisma/generated/prisma/client';
+import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { int } from 'zod';
 // 初始化prisma
 const adapter = new PrismaPg({connectionString:process.env.POSTGRESDB_URI});
 const prisma = new PrismaClient({adapter});
@@ -41,10 +42,16 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const portStr: string = String(process.env.TUS_SERVER_PORT);
+const PORT = parseInt(portStr || "3003", 10); // 我們讓這個服務預設跑在 3003 port
+const HOST = "0.0.0.0"; // 這樣不管是 localhost 還是 Docker 內部網路都能連上，而且前端連線時用的還是 localhost:3003（因為我們在 docker-compose.yml 中做了 port mapping）
+const WORKER_WEBHOOK_URL = process.env.IFC_FRAGS_CONVERT_WORKER_WEBHOOK_URL || 'http://localhost:3005/webhook/convert';
+const TUS_Server_URL = `http://${String(process.env.TUS_SERVER_HOST)}:${PORT}`;
+
 // 初始化 Socket.io
 const io = new SocketServer(server, {
     cors: {
-        origin: "*", // 允許前端連線
+        origin: TUS_Server_URL, // 允許前端連線，先不放寬限制 *
         methods: ["GET", "POST"]
     }
 });
@@ -53,10 +60,6 @@ const io = new SocketServer(server, {
 io.on('connection', (socket:any) => {
     console.log(`🔌 [Socket] 前端已連線: ${socket.id}`);
 });
-
-const PORT = 3003; // 我們讓這個服務跑在 3003 port
-const HOST = '0.0.0.0';
-const WORKER_WEBHOOK_URL = 'http://localhost:3005/webhook/convert';
 
 // 設定 Tus 儲存方式 (存到 MinIO)
 // 新版的 @tus/s3-store 中，你通常不需要手動 new S3Client() 再傳進去，
@@ -82,14 +85,18 @@ const tusServer = new Server({
     respectForwardedHeaders: true,
 });
 // Redis 連線 (給 QueueEvents 用)
+const redisEndpoint: string = String(process.env.REDIS_HOST || 'localhost');
+const redisportStr: string = String(process.env.REDIS_PORT);
 const redisConnection = new IORedis({
-    host: 'localhost',
-    port: 6379,
+    host: redisEndpoint,
+    port: parseInt(redisportStr || "6379"),
     maxRetriesPerRequest: null,
 });
 // 初始化 QueueEvents 監聽器
-// 自動連上 Redis，並監聽 'ifc-conversion-queue' 的所有動靜
-const queueEvents = new QueueEvents('ifc-conversion-queue', { 
+// 自動連上 Redis，並監聽所有動靜。
+// 名稱按照ENV 設置，tus-server 和 ifc-convert-frags-server 同步
+const ifcConversionQueue = String(process.env.IFC_CONVERSION_Q);
+const queueEvents = new QueueEvents(ifcConversionQueue || 'ifc-conversion-queue', { 
     connection: redisConnection 
 });
 // 監聽「進度更新」事件
@@ -186,6 +193,15 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
 // 處理 "後續操作" (PATCH/HEAD/DELETE /files/xxxx)
 app.all(/\/files.*/, (req: any, res: any) => {
     tusServer.handle(req, res);
+});
+
+// 拒絕其他所有請求 (GET, POST, etc.)
+app.all(/(.*)/, (req, res) => {
+    res.status(403).json({
+        success: false,
+        message: `${process.env.TUS_SERVER_HOST} 無法受理此請求 (Request Not Accepted)`,
+        timestamp: new Date().toISOString()
+    });
 });
 
 // 啟動伺服器

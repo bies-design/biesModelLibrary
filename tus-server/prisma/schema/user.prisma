@@ -1,0 +1,42 @@
+enum Role {
+  Free
+  Pro
+}
+
+model User {
+  // 使用 String 型別以兼容舊的 MongoDB ObjectId，新資料預設使用 cuid
+  id String @id @default(uuid())
+
+  // 對應 userName: { type: String, required: true, unique: true }
+  userName String @unique
+
+  // 對應 email: { type: String, required: true, unique: true }
+  email String @unique
+
+  // 對應 role: { type: String, enum: ["Free", "Pro"], required: true }
+  role Role @default(Free)
+
+  // 對應 image: { type: String }
+  image String?
+
+  // 對應 team: { type: [Schema.Types.ObjectId] }
+  // Postgres 支援字串陣列，這裡先用來存 ID。
+  // 若未來有 Team table，建議改成關聯 @relation
+  team String[]
+
+  // 對應 userCollection: { type: [Schema.Types.ObjectId] }
+  userCollection String[]
+
+  // 建立與 Account 的關聯 (User 能有多個 Account) provider不同會有不同account
+  accounts Account[]
+
+  // 一個使用者可以擁有多個模型
+  models Model[]
+  
+  pdfs Pdf[]
+
+  posts     Post[]
+  // 對應 timestamps: true
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

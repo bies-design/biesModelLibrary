@@ -1,0 +1,24 @@
+model Account {
+  id String @id @default(uuid())
+
+  // 對應 userId: { type: Schema.Types.ObjectId, ref: "User", required: true }
+  userId String
+  // 定義外鍵關聯：當 User 被刪除時，Account 也一併刪除 (Cascade) 一個account 只能有一個user
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 對應 password: { type: String }
+  password String?
+
+  // 對應 provider: { type: String, required: true }
+  provider String
+
+  // 對應 providerAccountId: { type: String, required: true }
+  providerAccountId String
+
+  // 對應 timestamps: true
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 建立複合索引 (可選，但推薦)：避免同一個 provider 重複綁定同一個 ID
+  @@unique([provider, providerAccountId])
+}
