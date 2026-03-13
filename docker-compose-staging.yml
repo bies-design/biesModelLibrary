@@ -6,7 +6,7 @@ services:
         container_name: PostgresSQL
         image: postgres:16
         ports:
-            - "5432:5432"
+            - ${POSTGRESDB_PORT}:${POSTGRESDB_PORT}
         environment:
             POSTGRES_USER: ${POSTGRESDB_USER}
             POSTGRES_PASSWORD: ${POSTGRESDB_PASSWORD}
@@ -24,10 +24,10 @@ services:
     minio:
         container_name: minio-local
         image: minio/minio:latest
-        command: server /data --console-address ":9001"
+        command: server /data --console-address ":"${S3_CONSOLE_PORT}
         ports:
-            - 9000:9000 # 程式連線用 (API)
-            - 9001:9001 # 你看介面用 (Console)
+            - ${S3_PORT}:${S3_PORT} # 程式連線用 (API)
+            - ${S3_CONSOLE_PORT}:${S3_CONSOLE_PORT} # 你看介面用 (Console)
         environment:
             MINIO_ROOT_USER: ${S3_ACCESS_KEY}
             MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
@@ -47,7 +47,7 @@ services:
         container_name: redis-local
         image: redis:alpine #輕量版
         ports:
-            - "6379:6379" # 讓你的 worker.js 可以透過 localhost:6379 連線
+            - ${REDIS_PORT}:${REDIS_PORT} # 讓你的 worker.js 可以透過 localhost:6379 連線
         # 開啟 AOF 持久化，防止重開機後 Queue 裡的任務消失
         command: redis-server --appendonly yes #開啟 AOF (Append Only File)，讓 Redis 把資料寫入硬碟。這樣如果你的電腦重開機，排隊中的轉檔任務不會消失。
         networks:
@@ -68,13 +68,13 @@ services:
             dockerfile: ./Dockerfile
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
-        ports:
-            - "3000:3000"
-        command: bash -c "booting frontend_init.sh"
+        command: bash -c "booting frontend_init.sh dev"
         networks:
             modlib:
                 aliases:
                     - modlib.frontend 
+        ports:
+            - ${FRONTEND_PORT}:${FRONTEND_PORT}
         depends_on:
             - tus-server
         env_file:
@@ -93,13 +93,13 @@ services:
         container_name: tus-server-local
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
-        ports:
-            - "1080:1080"
-        command: bash -c "booting tus-server_init.sh"
+        command: bash -c "booting tus-server_init.sh dev"
         networks:
             modlib:
                 aliases:
                     - modlib.tus-server
+        ports:
+            - ${TUS_SERVER_PORT}:${TUS_SERVER_PORT}
         depends_on:
             - db
             - minio
@@ -108,6 +108,7 @@ services:
             - ./.env
         volumes: 
             - ./tus-server:/usr/local/app
+            - ./prisma:/usr/local/prisma
         restart: unless-stopped
 
 
@@ -118,17 +119,20 @@ services:
         container_name: ifcToFragsConvertWorker-local
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
-        command: bash -c "booting ifcToFragsConvertWorker_init.sh"
+        command: bash -c "booting ifcToFragsConvertWorker_init.sh dev"
         networks:
             modlib:
                 aliases:
                     - modlib.worker 
+        ports:
+            - ${IFC_FRAGS_CONVERT_WORKER_PORT}:${IFC_FRAGS_CONVERT_WORKER_PORT}
         depends_on:
             - tus-server
         env_file:
             - ./.env
         volumes: 
             - ./ifcToFragsConvertWorker:/usr/local/app
+            - ./prisma:/usr/local/prisma
         restart: unless-stopped
 
 

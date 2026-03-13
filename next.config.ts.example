@@ -12,8 +12,8 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",      // 開發環境 MinIO 通常是 http
-        hostname: "minio-local",
-        port: "9000",
+        hostname: "localhost",
+        port: "9000",          // 你的 MinIO port
         pathname: "/**",       // 允許所有路徑
       },
       // 💡 預留區：等你上正式環境 (Production) 時，記得把正式網域也加進來
