@@ -169,7 +169,10 @@ const worker = new Worker(ifcConversionQueue2Work || 'ifc-conversion-queue', asy
 
 }, {
     connection: redisConnection,
-    concurrency: 1 // 🔥 關鍵！同時只能有 1 個任務在跑 (避免 OOM)
+    concurrency: 1, // 🔥 關鍵！同時只能有 1 個任務在跑 (避免 OOM)
+    // 延長任務超時保護鎖
+    lockDuration: 60000, // 延長到 60 秒 (毫秒單位)
+    lockRenewTime: 15000 // 每 15 秒嘗試續約一次
 });
 
 // 監聽 Worker 事件 (通知 Tus Server)
@@ -278,13 +281,13 @@ app.post('/webhook/convert', async(req, res) => {
 });
 
 // 拒絕其他所有請求 (GET, POST, etc.)
-app.all(/(.*)/, (req, res) => {
-    res.status(403).json({
-        success: false,
-        message: `${process.env.IFC_FRAGS_CONVERT_WORKER_HOST} 無法受理此請求 (Request Not Accepted)`,
-        timestamp: new Date().toISOString()
-    });
-});
+// app.all(/(.*)/, (req, res) => {
+//     res.status(403).json({
+//         success: false,
+//         message: `${process.env.IFC_FRAGS_CONVERT_WORKER_HOST} 無法受理此請求 (Request Not Accepted)`,
+//         timestamp: new Date().toISOString()
+//     });
+// });
 
 app.listen(PORT, () => {
     console.log(`--------------------------------------------------`);

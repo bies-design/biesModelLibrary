@@ -48,7 +48,7 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
         restrictions: { allowedFileTypes: ['.ifc'] },
         });
         uppyInstance.use(Tus, {
-        endpoint: "http://" + TusServHost + ":" + TusServPortNum + "/files/", // 指向你的 Tus Server
+        endpoint: "http://" + TusServHost + ":" + TusServPortNum + "/files/", // 指向你的 Tus Server 避免錯誤合併訪問時本機位置, 用絕對路徑
         chunkSize: 5 * 1024 * 1024,
         retryDelays: [0, 1000, 3000, 5000],
         removeFingerprintOnSuccess: true,
@@ -59,23 +59,24 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 
     // 2. WebSocket 監聽 (處理轉檔通知)
     useEffect(() => {
-        const listen2TusServUrl = "http://" + TusServHost + ":" + TusServPortNum;
+        const listen2TusServUrl = TusServHost + ":" + TusServPortNum;
         const socket: Socket = io(
-            listen2TusServUrl, //default url: "http://localhost:3003"
+            listen2TusServUrl, //default url: "http://localhost:3003", 去掉http:// 避免呼叫瀏覽器解析, 直接在連線環境尋找
             {
                 autoConnect: true, // 關閉自動發起連線
                 transports: ["websocket", "polling"]
+                // transports: [ "polling"] // 測試用
             }
         );
 
         // 連線建立成功
         socket.on("connect", () => {
-            console.log("🔌 Socket connected");
+            console.log("[Upload Ctrl] 🔌 Socket connected");
 
         });
         // 監聽進度更新
         socket.on("conversion-progress", (data: { fileId: string, progress: number }) => {
-            console.log(`📊 收到進度: ${data.fileId} -> ${data.progress}%`);
+            console.log(`[Upload Ctrl] 📊 收到進度: ${data.fileId} -> ${data.progress}%`);
 
             setTrackedFiles((prev) => {
                 // 1. 根據 TusId (fileId) 反查 UppyId
@@ -96,19 +97,19 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
         });
         // 監聽 Worker 完成訊號
         socket.on("conversion-complete", (data: { fileId: string, status: string,fileName:string, message?: string }) => {
-            console.log("✅ Socket 收到通知:", data);
+            console.log("[Upload Ctrl] ✅ Socket 收到通知:", data);
 
             // 先透過 Ref 找到 UppyId (不需要進入 setState 就能找)
             const uppyId = tusIdMap.current[data.fileId].id;
             if (!uppyId) {
-                console.warn(`⚠️ 收到通知但找不到對應檔案: TusID=${data.fileId}`);
+                console.warn(`[Upload Ctrl] ⚠️ 收到通知但找不到對應檔案: TusID=${data.fileId}`);
                 return;
             }
             // 在這裡處理副作用 (Toast)，保證只執行一次
             if (data.status === 'success') {
                 addToast({
                     title: "轉檔完成",
-                    description: `${data.fileName}已準備就緒`, // 這裡暫時拿不到 file.name，稍後說明
+                    description: `[Upload Ctrl] ${data.fileName}已準備就緒`, // 這裡暫時拿不到 file.name，稍後說明
                     color: "success",
                     timeout: Infinity,
                 });
@@ -176,7 +177,7 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
                 userid: session.user.id,
                 email: session.user.email 
             });
-            console.log("✅ [UploadContext] Uppy 已綁定 User:", session.user.id);
+            console.log("[Upload Ctrl] ✅ [UploadContext] Uppy 已綁定 User:", session.user.id);
         }
     }, [uppy, session]); // 👈 關鍵：這裡要監聽 session
 
@@ -220,11 +221,11 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
         // C. 上傳完成 (Tus 結束 -> 進入 Worker 等待期)
         uppy.on('upload-success', (file) => {
         if (!file) return;
-        console.log("🔍 [Debug] File Object:", file);
-        console.log(`🚀 [Uppy] ${file.name} 上傳 MinIO 完畢，等待轉檔...`);
+        console.log("[Upload Ctrl] 🔍 [Debug] File Object:", file);
+        console.log(`[Upload Ctrl] 🚀 [Uppy] ${file.name} 上傳 MinIO 完畢，等待轉檔...`);
         const uploadUrlFromTus = file.tus?.uploadUrl;
         const fileid = uploadUrlFromTus?.split('/').pop();
-        console.log(`🚀 [Uppy] 提取出fileid${fileid}，提供後續比對使用 填入tusId `);
+        console.log(`[Upload Ctrl] 🚀 [Uppy] 提取出fileid${fileid}，提供後續比對使用 填入tusId `);
         // 紀錄 TusId 對應到的 UppyId
         if(fileid) tusIdMap.current[fileid] = { id:file.id, name: file.name };
 
@@ -279,6 +280,6 @@ export const UploadProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useUpload = () => {
     const context = useContext(UploadContext);
-    if (!context) throw new Error("useUpload must be used within an UploadProvider");
+    if (!context) throw new Error("[Upload Ctrl] useUpload must be used within an UploadProvider");
     return context;
 };

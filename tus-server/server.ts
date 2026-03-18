@@ -27,7 +27,7 @@ const app = express();
 // 建立 HTTP Server (為了綁定 WebSocket)
 const server = http.createServer(app);
 
-// 設定 CORS (關鍵！否則前端會被擋)
+// 設定 Exporess CORS (關鍵！否則前端會被擋)
 // 這裡我們允許來自 localhost:3000 的請求
 const corsOptions = {
     origin: '*', 
@@ -45,14 +45,20 @@ app.use(express.urlencoded({ extended: true }));
 const portStr: string = String(process.env.TUS_SERVER_PORT);
 const PORT = parseInt(portStr || "3003", 10); // 我們讓這個服務預設跑在 3003 port
 const HOST = "0.0.0.0"; // 這樣不管是 localhost 還是 Docker 內部網路都能連上，而且前端連線時用的還是 localhost:3003（因為我們在 docker-compose.yml 中做了 port mapping）
-const WORKER_WEBHOOK_URL = process.env.IFC_FRAGS_CONVERT_WORKER_WEBHOOK_URL || 'http://localhost:3005/webhook/convert';
-const TUS_Server_URL = `http://${String(process.env.TUS_SERVER_HOST)}:${PORT}`;
+const WORKER_WEBHOOK_URL = `http://${process.env.IFC_FRAGS_CONVERT_WORKER_WEBHOOK_URL}/webhook/convert` || 'http://localhost:3005/webhook/convert';
+const TUS_Server_URL = `${process.env.TUS_SERVER_HOST}:${PORT}`;
 
-// 初始化 Socket.io
+// 初始化 Socket.io 並設定 Socket 關聯的 CORS Policy
+const allowedOrigins = [
+  `http://${HOST}:${PORT}`,        // 前端開發網址
+  `http://${process.env.TUS_SERVER_URL}:${PORT}`,     // 另一個前端
+  `http://${process.env.TARGET_HOST}:${PORT}`,     // 從環境變數讀取的 TUS 網址
+];
 const io = new SocketServer(server, {
     cors: {
-        origin: TUS_Server_URL, // 允許前端連線，先不放寬限制 *
+        origin: "*", // 允許前端連線，先不放寬限制 *
         methods: ["GET", "POST"]
+        // credentials: true       // OPTIONS: 如果你有用到 Cookie 或 Authorization Header 建議加上
     }
 });
 
@@ -64,12 +70,13 @@ io.on('connection', (socket:any) => {
 // 設定 Tus 儲存方式 (存到 MinIO)
 // 新版的 @tus/s3-store 中，你通常不需要手動 new S3Client() 再傳進去，
 // 而是直接在 s3ClientConfig 物件中傳入 AWS 的設定參數，S3Store 內部會幫你建立 Client
+const S3_Endpoint_str = `http://${process.env.S3_HOST}:${process.env.S3_PORT}`;  // 需要加上 http:// 避免host&port 在S3Store 類別中錯誤使用
 const store = new S3Store({
     partSize: 5 * 1024 * 1024, // 設定每個分片 5MB (保護上傳記憶體穩定)
     s3ClientConfig:{
         bucket: process.env.S3_IFC_BUCKET!,
         region: process.env.S3_REGION,
-        endpoint: process.env.S3_ENDPOINT ,
+        endpoint: S3_Endpoint_str ,
         credentials: {
             accessKeyId: process.env.S3_ACCESS_KEY!,
             secretAccessKey: process.env.S3_SECRET_KEY!,
@@ -191,18 +198,35 @@ tusServer.on(EVENTS.POST_FINISH, async(req:any, res:any, upload:any) => {
 // 注意：Tus 需要處理 HEAD, PATCH, POST 等請求，所以用 app.all
 // 處理 "建立上傳" (POST /files)
 // 處理 "後續操作" (PATCH/HEAD/DELETE /files/xxxx)
-app.all(/\/files.*/, (req: any, res: any) => {
+app.post(/files/, (req: any, res: any) => {
+    const path = req.url || "none"; // 例如 "/api/hello?name=next"
+    console.log(`[Tus] Receive files requestion POST ... ${path}`);
+    tusServer.handle(req, res);
+});
+app.patch(/files/, (req: any, res: any) => {
+    const path = req.url || "none"; // 例如 "/api/hello?name=next"
+    console.log(`[Tus] Receive files requestion PATCH ... ${path}`);
+    tusServer.handle(req, res);
+});
+app.head(/files/, (req: any, res: any) => {
+    const path = req.url || "none"; // 例如 "/api/hello?name=next"
+    console.log(`[Tus] Receive files requestion HEAD ... ${path}`);
+    tusServer.handle(req, res);
+});
+app.delete(/files/, (req: any, res: any) => {
+    const path = req.url || "none"; // 例如 "/api/hello?name=next"
+    console.log(`[Tus] Receive files requestion DELETE ... ${path}`);
     tusServer.handle(req, res);
 });
 
 // 拒絕其他所有請求 (GET, POST, etc.)
-app.all(/(.*)/, (req, res) => {
-    res.status(403).json({
-        success: false,
-        message: `${process.env.TUS_SERVER_HOST} 無法受理此請求 (Request Not Accepted)`,
-        timestamp: new Date().toISOString()
-    });
-});
+// app.all(/(.*)/, (req, res) => {
+//     res.status(403).json({
+//         success: false,
+//         message: `${process.env.TUS_SERVER_HOST} 無法受理此請求 (Request Not Accepted)`,
+//         timestamp: new Date().toISOString()
+//     });
+// });
 
 // 啟動伺服器
 server.listen(PORT, HOST, () => {

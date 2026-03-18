@@ -93,10 +93,12 @@ const ModelUploadSidebar = ({
     if(postType === '2D') return;
     setIsLoading(true);
     try {
+      console.log(`[mod Upload Sidebar] waiting fetch user models ...`);
       const result = await getUserModels();
       
       if (result.success && result.data) {
         // 將 DB 資料轉換成 FileItem 格式
+        console.log(`[mod Upload Sidebar] translate DB data to FileItem ...`);
         const dbFiles: UIModel[] = result.data.map((model) => {
           
           return {
@@ -114,8 +116,11 @@ const ModelUploadSidebar = ({
         setCompletedModels(dbFiles);
         // 如果需要同步給父層，也可以在這裡呼叫 onFilesChange(dbFiles);
       }
+      else{
+        console.warn(`[mod Upload Sidebar] ` + result.error);
+      }
     } catch (error) {
-      console.error("Error loading models:", error);
+      console.error("[mod Upload Sidebar] Error loading models:", error);
     } finally {
       setIsLoading(false);
     }
@@ -132,11 +137,12 @@ const ModelUploadSidebar = ({
       const extension = file.name.split('.').pop()?.toLowerCase();
       const type = (extension === 'ifc' || extension === 'frag') ? '3d' : 'pdf';
       // testing for telling whether the file loader work
-      console.log(`File uploaded: ${file.name}, Extension: .${extension}, Type: ${type}`);
+      console.log(`[mod Upload Sidebar] File uploaded: ${file.name}, Extension: .${extension}, Type: ${type}`);
       
       // 我們只上傳 IFC 檔案 (根據你的需求)
       if (extension === 'ifc') {
         try {
+          console.log(`[Uppy] 檔案 ${file.name} 上傳佇列 ...`);
           uppy.addFile({
             name: file.name, // 使用檔名作為識別
             type: file.type,
@@ -195,12 +201,12 @@ const ModelUploadSidebar = ({
       const response = await fetch(`/api/frags/${fileId}`);
 
       if (!response.ok) {
-        throw new Error("下載失敗");
+        throw new Error("[mod Upload Sidebar] 下載失敗");
       }
 
       const buffer = await response.arrayBuffer();
 
-      console.log(`📦 模型下載成功: ${modelName}, 大小: ${buffer.byteLength}`);
+      console.log(`[mod Upload Sidebar] 📦 模型下載成功: ${modelName}, 大小: ${buffer.byteLength}`);
 
       onLoadModel(buffer, modelName);
 
@@ -215,7 +221,7 @@ const ModelUploadSidebar = ({
       onSelectFile(newLoadedItem);
 
     }catch(error){
-      console.error("載入失敗:", error);
+      console.error("[mod Upload Sidebar] 載入失敗:", error);
     }finally{
       setLoadingModelId(null);
     }
@@ -240,15 +246,15 @@ const ModelUploadSidebar = ({
             // 確保模型物件的矩陣與包圍盒已更新不然聚焦空盒會黑屏
             const box = new THREE.Box3().setFromObject(model.object);
             if (box.isEmpty()) {
-              console.warn(`模型 ${id} 的包圍盒為空，延遲 100ms 後重試`);
+              console.warn(`[mod Upload Sidebar] 模型 ${id} 的包圍盒為空，延遲 100ms 後重試`);
               return;
             }
 
             world.camera.controls?.fitToBox(model.object,true);       
-            console.log(`聚焦至模型: ${id}`);
+            console.log(`[mod Upload Sidebar] 聚焦至模型: ${id}`);
           }
         }else {
-            console.warn(`找不到模型 ${id} 無法聚焦`);
+            console.warn(`[mod Upload Sidebar] 找不到模型 ${id} 無法聚焦`);
         }
       }
     }

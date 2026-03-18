@@ -2,28 +2,44 @@ services:
 #=================
 #PostgresSQL 16
 #=================
-    db:
+    PostgresSQL:
         container_name: PostgresSQL
         image: postgres:16
         ports:
             - ${POSTGRESDB_PORT}:${POSTGRESDB_PORT}
         environment:
+            PGPORT: ${POSTGRESDB_PORT}
             POSTGRES_USER: ${POSTGRESDB_USER}
             POSTGRES_PASSWORD: ${POSTGRESDB_PASSWORD}
             POSTGRES_DB: ${POSTGRESDB_DB}
         networks:
             modlib:
                 aliases:
-                    - modlib.pgsql
+                    - modlib.PostgresSQL
         volumes:
             - pgdata_local:/var/lib/postgresql/data # 資料庫存檔位置
+        restart: unless-stopped
+
+    adminer:
+        container_name: adminer
+        image: adminer:5.4.2
+        environment:
+            ADMINER_DEFAULT_SERVER: PostgresSQL
+        networks:
+            modlib:
+                aliases:
+                    - modlib.adminer
+        ports:
+            - ${DB_ADMIN_PORT}:8080
+        depends_on:
+            - PostgresSQL
         restart: always
 #=================
 #minio
 #=================
-    minio:
+    minio-local:
         container_name: minio-local
-        image: minio/minio:latest
+        image: minio/minio:RELEASE.2025-09-07T16-13-09Z
         command: server /data --console-address ":"${S3_CONSOLE_PORT}
         ports:
             - ${S3_PORT}:${S3_PORT} # 程式連線用 (API)
@@ -31,37 +47,82 @@ services:
         environment:
             MINIO_ROOT_USER: ${S3_ACCESS_KEY}
             MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY}
+            MINIO_API_CORS_ALLOW_ORIGIN: "http://${TUS_SERVER_HOST}:${TUS_SERVER_PORT}, http://${TARGET_HOST}:${TUS_SERVER_PORT}"
         networks:
             modlib:
                 aliases:
-                    - modlib.minio
+                    - modlib.minio-local
         volumes:
             - minio_data_local:/data # 檔案存檔位置
-        restart: always
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:${S3_PORT}/minio/health/live"]
+            interval: 5s
+            timeout: 20s
+            retries: 3
+        restart: unless-stopped
 
+    # 初始化容器：負責建立 Bucket
+    minio-init:
+        container_name: minio-init
+        image: minio/mc:RELEASE.2025-08-13T08-35-41Z
+        depends_on:
+            minio-local:
+                condition: service_healthy
+        networks:
+            modlib:
+                aliases:
+                    - modlib.minio-init
+        entrypoint: >
+            /bin/sh -c "
+            /usr/bin/mc alias set myminio http://${S3_HOST}:${S3_PORT} ${S3_ACCESS_KEY} ${S3_SECRET_KEY};
+            /usr/bin/mc mb myminio/${S3_IFC_BUCKET} || true; 
+            /usr/bin/mc mb myminio/${S3_FRAGS_BUCKET} || true;
+            /usr/bin/mc mb myminio/${S3_IMAGES_BUCKET} || true;
+            /usr/bin/mc mb myminio/${S3_PDF_BUCKET} || true;
+            /usr/bin/mc anonymous set public myminio/${S3_IFC_BUCKET};
+            exit 0;
+            "
 
 #=================
 # Redis
 #=================
-    redis:
+    redis-local:
         container_name: redis-local
         image: redis:alpine #輕量版
         ports:
-            - ${REDIS_PORT}:${REDIS_PORT} # 讓你的 worker.js 可以透過 localhost:6379 連線
+            - ${REDIS_PORT}:6379 # 讓你的 worker.js 可以透過 localhost:6379 連線
         # 開啟 AOF 持久化，防止重開機後 Queue 裡的任務消失
         command: redis-server --appendonly yes #開啟 AOF (Append Only File)，讓 Redis 把資料寫入硬碟。這樣如果你的電腦重開機，排隊中的轉檔任務不會消失。
         networks:
             modlib:
                 aliases:
-                    - modlib.redis
+                    - modlib.redis-local
         volumes:
             - redis_data_local:/data
+        restart: unless-stopped
+
+    redisinsight:
+        container_name: redis-insight
+        image: redis/redisinsight:3.2.0
+        ports:
+            - "${REDIS_INSIGHT_PORT}:5540"
+        networks:
+            modlib:
+                aliases:
+                    - modlib.redisinsight
+        depends_on:
+            - redis-local
+        volumes:
+            - redisinsight_data:/db
+        environment:
+            # Optional: Connects RedisInsight to the redis-stack service automatically
+            REDIS_HOST: redis-local
         restart: always
 
 #=================
 # Frontend
 #=================
-    frontend:
+    frontend-local:
         container_name: frontend-local
         build: 
             context: .
@@ -72,11 +133,11 @@ services:
         networks:
             modlib:
                 aliases:
-                    - modlib.frontend 
+                    - modlib.frontend-local
         ports:
             - ${FRONTEND_PORT}:${FRONTEND_PORT}
         depends_on:
-            - tus-server
+            - ifcToFragsConvertWorker-local
         env_file:
             - ./.env
         volumes: 
@@ -89,7 +150,7 @@ services:
 #=================
 # Tus-Server
 #=================
-    tus-server:
+    tus-server-local:
         container_name: tus-server-local
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
@@ -97,13 +158,14 @@ services:
         networks:
             modlib:
                 aliases:
-                    - modlib.tus-server
+                    - modlib.tus-server-local
         ports:
             - ${TUS_SERVER_PORT}:${TUS_SERVER_PORT}
         depends_on:
-            - db
-            - minio
-            - redis
+            - PostgresSQL
+            - minio-local
+            - minio-init
+            - redis-local
         env_file:
             - ./.env
         volumes: 
@@ -115,7 +177,7 @@ services:
 #=================
 # Worker: IFC to Fragments Converter
 #=================
-    ifcToFragsConvertWorker:
+    ifcToFragsConvertWorker-local:
         container_name: ifcToFragsConvertWorker-local
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
@@ -123,11 +185,11 @@ services:
         networks:
             modlib:
                 aliases:
-                    - modlib.worker 
+                    - modlib.ifcToFragsConvertWorker-local 
         ports:
             - ${IFC_FRAGS_CONVERT_WORKER_PORT}:${IFC_FRAGS_CONVERT_WORKER_PORT}
         depends_on:
-            - tus-server
+            - tus-server-local
         env_file:
             - ./.env
         volumes: 
@@ -143,6 +205,7 @@ volumes:
     pgdata_local:
     minio_data_local:
     redis_data_local:
+    redisinsight_data:
 #執行 docker-compose --env-file .env.local up -d
 #-d means Detached mode 在背景執行這些容器，不要佔用我的終端機（Terminal）畫面
 networks:

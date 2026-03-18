@@ -19,5 +19,5 @@ docker compose -f docker-compose-staging.yml up -d
 
 > prod
 ```bash
-docker compose up -ds
+docker compose up -d
 ```

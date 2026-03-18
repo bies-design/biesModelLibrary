@@ -100,7 +100,7 @@ const Upload = () => {
                 // 這裡拿到的 screenshotUrl 現在是 "blob:http://localhost:3000/..."
                 // 短小精幹，不會塞爆記憶體
                 setCoverImage(screenshotUrl);
-                console.log("封面擷取成功！(Blob URL)");
+                console.log("[Page] 封面擷取成功！(Blob URL)");
             }
         }
         if (step === 3) {
@@ -114,7 +114,7 @@ const Upload = () => {
     // 處理最終建立邏輯
     const handleCreate = async () => {
 
-        console.log("正在建立模型卡片...", {
+        console.log("[Page] 正在建立模型卡片...", {
             files: uploadedFiles,
             cover: coverImage,
             additionalImages: additionalImages,
@@ -123,14 +123,14 @@ const Upload = () => {
         });
 
         if (loadedFiles.length === 0) {
-            alert("請載入至少一個模型！");
+            alert("[Page] 請載入至少一個模型！");
             return;
         }
 
         setIsSubmitting(true);
 
         try {
-            console.log("1. 開始上傳圖片...");
+            console.log("[Page] 1. 開始上傳圖片...");
             
             // A. 上傳封面圖 (如果有)
             let coverKey: string | null = null;
@@ -152,7 +152,7 @@ const Upload = () => {
                 if (key) imageKeys.push(key);
             });
 
-            console.log("2. 圖片上傳完成，寫入資料庫...", { coverKey, imageKeys });
+            console.log("[Page] 2. 圖片上傳完成，寫入資料庫...", { coverKey, imageKeys });
             console.warn("選中模型ID為",loadedFiles);
 
             // C. 呼叫 Server Action 寫入 DB 
@@ -166,7 +166,7 @@ const Upload = () => {
                     modelIds: loadedFiles.map(file => file.dbId), // 使用者選中模型的資料庫ID
                 });
                 if (result.success) {
-                    console.log("✅ 建立成功！");
+                    console.log("[Page] ✅ 建立成功！");
                     router.push('/?status=success');
                 } else {
                     throw new Error(result.error);
@@ -181,7 +181,7 @@ const Upload = () => {
                     pdfIds: loadedFiles.map(file => file.dbId), // 使用者選中模型的資料庫ID
                 });
                 if (result.success) {
-                    console.log("✅ 建立成功！");
+                    console.log("[Page] ✅ 建立成功！");
                     router.push('/?status=success');
                 } else {
                     throw new Error(result.error);
@@ -217,7 +217,7 @@ const Upload = () => {
         setStep((prev) => Math.max(prev - 1, 1));
     };
     useEffect(() => {
-        console.log(`選擇file:${selectedFile?.name}`);
+        console.log(`[Page] 選擇file:${selectedFile?.name}`);
         // console.log(uploadedFiles.map((a)=>(a.name)));   
     },[selectedFile,uploadedFiles])
     

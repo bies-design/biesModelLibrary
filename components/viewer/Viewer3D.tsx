@@ -39,7 +39,7 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
             const modelId = modelName;
              // Dispose existing model if it has the same ID
             if (fragments.list.has(modelId)) {
-                console.error(`Viewer3D already have ${modelId} model in Scene`);
+                console.error(`[Viewer3D] already have ${modelId} model in Scene`);
                 return;
             }
             const fragModel = await fragments.core.load(buffer, { modelId });
@@ -80,10 +80,10 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
                     
                     world.camera.controls?.fitToBox(model.object,true);
                     
-                    console.log(`聚焦至模型: ${modelId}`);
+                    console.log(`[Viewer3D] 聚焦至模型: ${modelId}`);
                 }
             } else {
-                console.warn(`找不到模型 ${modelId} 無法聚焦`);
+                console.warn(`[Viewer3D] 找不到模型 ${modelId} 無法聚焦`);
             }
         },
         //screen shot the model
@@ -129,11 +129,11 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
                     return fragsBuffer;
 
                 } catch (error) {
-                    console.error("匯出模型時發生錯誤:", error);
+                    console.error("[Viewer3D] 匯出模型時發生錯誤:", error);
                     return null;
                 }
             }
-            console.log(`找不到 ID 為 ${modelId} 的模型`);
+            console.log(`[Viewer3D] 找不到 ID 為 ${modelId} 的模型`);
             return null;
         },
         //delete the model
@@ -147,7 +147,7 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
             if(model){
                 //release the memory and remove from the scene and list
                 model.dispose();
-                console.log(`模型${modelId} 已從場景與記憶體中完全移除`);
+                console.log(`[Viewer3D] 模型${modelId} 已從場景與記憶體中完全移除`);
             }
         },
     }));
@@ -182,7 +182,7 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
 
             if (currentResizeObserver) {
                 currentResizeObserver.disconnect();
-                console.log("ResizeObserver disconnected");
+                console.log("[Viewer3D] ResizeObserver disconnected");
             }
 
             if (componentsRef.current) {
@@ -200,7 +200,7 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
                 }
                 componentsRef.current.dispose();
                 componentsRef.current = null;
-                console.warn("Viewer Component unmounted")
+                console.warn("[Viewer3D] Viewer Component unmounted")
             }
         };
     }, []);
@@ -241,10 +241,11 @@ const Viewer3D = forwardRef<Viewer3DRef, Viewer3DProps>(({ allFiles, file, onIFC
                         console.log(`[Viewer3D] 收到 IFC 檔案 ${fileItem.name}，跳過前端載入，等待後端轉檔為 FRAG。`);
                     } 
                     else if (extension === 'frag') {
+                        console.log(`[Viewer3D] 等待載入 FRAG 資料`);
                         await fragments.core.load(buffer, { modelId });
                     } 
                 } catch (error) {
-                    console.error(`載入 ${fileItem.name} 失敗:`, error);
+                    console.error(`[Viewer3D] 載入 ${fileItem.name} 失敗:`, error);
                 }
             }
         } finally {
