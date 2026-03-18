@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+// import React;
+import { useState, useRef, useCallback, useEffect } from 'react';
 import SidebarUpload from '@/components/sidebar/SidebarUpload';
 import SidebarBlobs from '@/components/blobs/SidebarBlobs';
 import Viewer3D, { Viewer3DRef } from '@/components/viewer/Viewer3D';
@@ -7,10 +8,10 @@ import PDFViewer from '@/components/viewer/PDFViewer';
 import { PDFViewerRef } from '@/components/viewer/PDFViewerInternal';
 import ModelUploadSidebar from '@/components/sidebar/ModelUploadSidebar';
 import MetadataForm, { Metadata, ImageFile } from '@/components/forms/MetadataForm';
-import { redirect } from 'next/navigation';
+// import { redirect } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
-import { Model,UIModel } from '@/types/upload';
+// import { Loader2 } from 'lucide-react';
+// import { Model,UIModel } from '@/types/upload';
 import { createPost } from '@/lib/actions/post.action';
 
 // 定義檔案項目介面

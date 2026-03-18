@@ -17,7 +17,7 @@ import IORedis from 'ioredis';
 import {nanoid} from 'nanoid';
 import { PrismaClient } from './prisma/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { int } from 'zod';
+// import { int } from 'zod';
 // 初始化prisma
 const adapter = new PrismaPg({connectionString:process.env.POSTGRESDB_URI});
 const prisma = new PrismaClient({adapter});

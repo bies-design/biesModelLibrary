@@ -3,10 +3,10 @@
 import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } from 'react';
 import * as OBC from "@thatopen/components";
 import * as OBF from "@thatopen/components-front";
-import * as Frags from "@thatopen/fragments";
+// import * as Frags from "@thatopen/fragments";
 import { setupComponents } from '../bim-components';
 import { FileItem } from '@/app/(uploadAndDashboard)/upload/page';
-import * as THREE from 'three';
+// import * as THREE from 'three';
 
 export interface Viewer3DRef {
     getComponents: () => OBC.Components | null;
