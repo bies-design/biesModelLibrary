@@ -148,7 +148,7 @@ services:
         restart: unless-stopped
 
 #=================
-# Tus-Server
+# Tus-Server: middleware of Redis/Jobs Manager & Monitor
 #=================
     tus-server-local:
         container_name: tus-server-local
@@ -182,6 +182,8 @@ services:
         image: biescloudtechsupport/node:24.0-slim
         working_dir: /usr/local
         command: bash -c "booting ifcToFragsConvertWorker_init.sh dev"
+        environment:
+            - NODE_OPTIONS=--max-old-space-size=8192  # 允許最多可以使用 8GB 記憶體
         networks:
             modlib:
                 aliases:
@@ -195,6 +197,10 @@ services:
         volumes: 
             - ./ifcToFragsConvertWorker:/usr/local/app
             - ./prisma:/usr/local/prisma
+        deploy:
+            resources:
+                limits:
+                    memory: 10G                       # 確保容器本身記憶體不超用10 GB，就不會被 Docker 殺掉
         restart: unless-stopped
 
 
