@@ -18,7 +18,7 @@ const SetLanguageButton = () => {
             size="sm"
             variant="bordered"
             aria-label="Select language"
-            className='invert dark:invert-0 font-inter'
+            className='text-white invert dark:invert-0 font-inter'
             >
             {locale === "en-US" ? "English" : "中文"}
             </Button>
@@ -33,8 +33,8 @@ const SetLanguageButton = () => {
             setLocale(key);
             }}
         >
-            <DropdownItem key="en-US">English</DropdownItem>
-            <DropdownItem key="zh-CN">中文</DropdownItem>
+            <DropdownItem className="dark:text-white" key="en-US">English</DropdownItem>
+            <DropdownItem className="dark:text-white" key="zh-CN">中文</DropdownItem>
         </DropdownMenu>
         </Dropdown>
     </NavbarItem>

@@ -27,7 +27,7 @@ const PostCard = ({
   const router = useRouter();
 
   return (
-    <Tooltip content={title} placement='bottom'>
+    <Tooltip content={title} placement='bottom' color="warning" showArrow={true}>
       <div key={dbId} onClick={()=> router.push(`/post/${shortId}`)} className='hover-lift cursor-pointer w-[400px] sm:w-[250px] md:w-[25vw] h-[300px]'>
         <Card className="w-full h-full flex-col pb-4 pt-4 pl-4 pr-4 bg-[#FFFFF4] dark:bg-[#3F3F46] shadow-[4px_4px_3px_rgba(0,0,0,0.5),inset_0px_5px_0px_rgba(255,255,255,1)] dark:shadow-[4px_4px_20px_rgba(0,0,0,0.32),4px_4px_20px_rgba(0,0,0,0.66),inset_0px_2px_5px_rgba(255,255,255,0.25)]">
           <CardBody 
@@ -90,7 +90,7 @@ const PostCard = ({
                 />
                 <p className='ml-1 font-medium text-black dark:text-[#E4E4E7] font-medium'><span className='hidden lg:inline'>Download</span></p>
               </button>
-              <Tooltip content={`Archive`} placement='bottom'>
+              <Tooltip content={`Archive`} placement='bottom' color="warning" showArrow={true}>
                 <button
                   onClick={(e)=>{e.stopPropagation(); console.log("Archive clicked");}}
                   aria-label={`Archive ${title}`}

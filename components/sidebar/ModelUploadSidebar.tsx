@@ -408,7 +408,7 @@ const ModelUploadSidebar = ({
               Cloud {postType} Models ({cloudModels.length})
             </p>
             <div className="flex items-center gap-2">
-              <Tooltip content={`Refresh`} placement='bottom'>
+              <Tooltip content={`Refresh`} placement='bottom' color="warning" showArrow={true}>
                 <button onClick={(e) => { e.stopPropagation(); fetchUserModels(); }} className="text-[#A1A1AA] hover:text-white">
                   <RefreshCw size={14} />
                 </button>
@@ -434,7 +434,7 @@ const ModelUploadSidebar = ({
                     }`}
                   >
                     {item.type === '3d' ? <Box width={20} height={20} className='shrink-0'/> : <FileText size={20} />}
-                    <Tooltip content={`${item.name}`} placement='bottom'>
+                    <Tooltip content={`${item.name}`} placement='bottom' color="warning" showArrow={true}>
                       <span className="text-sm truncate flex-grow">                    
                           {item.name}
                       </span>
@@ -442,7 +442,7 @@ const ModelUploadSidebar = ({
                     {item.name === loadingModelId ? (<Loader2 size={16}/>)
                     :( 
                       <>
-                        <Tooltip content={`Load model`} placement='bottom'>
+                        <Tooltip content={`Load model`} placement='bottom' color="warning" showArrow={true}>
                           <button
                             onClick={(e) => downloadAndLoadFrag(item.id,item.fileId,item.name, e)}
                             aria-label={`Load ${item.name}`}
@@ -456,7 +456,7 @@ const ModelUploadSidebar = ({
                           >
                             <DropdownTrigger>
                               <div className='flex'>
-                                <Tooltip content="More Options" placement="bottom">
+                                <Tooltip content="More Options" placement="bottom" color="warning" showArrow={true}>
                                   <button>
                                     <ChevronRight size={16} className="shrink-0" />
                                   </button>
@@ -539,7 +539,7 @@ const ModelUploadSidebar = ({
                     }`}
                   >
                     {item.type === '3d' ? <Box width={20} height={20} className='shrink-0'/> : <FileText size={20} />}
-                    <Tooltip content={`${item.name}`} placement='bottom'>
+                    <Tooltip content={`${item.name}`} placement='bottom' color="warning" showArrow={true}>
                       <span className="text-sm truncate flex-grow">                    
                           {item.name}
                       </span>
@@ -547,7 +547,7 @@ const ModelUploadSidebar = ({
                     {item.name === loadingModelId ? (<Loader2 size={16}/>)
                     :( 
                       <>
-                        <Tooltip content={`Focus`} placement='bottom'>
+                        <Tooltip content={`Focus`} placement='bottom' color="warning" showArrow={true}>
                           <button
                             onClick={(e) => focusModel(item.name, e)}
                             aria-label={`Focus ${item.name}`}
@@ -561,7 +561,7 @@ const ModelUploadSidebar = ({
                           >
                             <DropdownTrigger>
                               <div className='flex'>
-                                <Tooltip content="More Options" placement="bottom">
+                                <Tooltip content="More Options" placement="bottom" color="warning" showArrow={true}>
                                   <button>
                                     <ChevronRight size={16} className="shrink-0" />
                                   </button>
