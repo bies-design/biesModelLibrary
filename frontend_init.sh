@@ -5,9 +5,9 @@ ARGC=$1
 
 if [ "${ARGC}" == "dev" ]; then
     echo "Running in development mode..."
-    # if [ -e .postgresinit ]; then
-    #     rm .postgresinit
-    # fi
+    if [ -e .postgresinit ]; then
+        rm .postgresinit
+    fi
     # if [ -e .frontendinit ]; then
     #     rm .frontendinit
     # fi
