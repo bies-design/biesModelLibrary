@@ -18,6 +18,18 @@ services:
                     - modlib.PostgresSQL
         volumes:
             - pgdata_local:/var/lib/postgresql/data # 資料庫存檔位置
+        healthcheck:
+            # pg_isready 會檢查資料庫是否已啟動並準備好接受連線
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRESDB_USER} -d ${POSTGRESDB_DB}"]
+            interval: 10s      # 每 10 秒檢查一次
+            timeout: 8s       # 每次檢查超過 5 秒視為失敗
+            retries: 5        # 連續失敗 5 次才將狀態標記為 Unhealthy
+            start_period: 10s # 容器啟動後的「寬限期」，這段時間失敗不計入 retries
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: unless-stopped
 
     adminer:
@@ -32,7 +44,13 @@ services:
         ports:
             - ${DB_ADMIN_PORT}:8080
         depends_on:
-            - PostgresSQL
+            PostgresSQL:
+                condition: service_healthy
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: always
 #=================
 #minio
@@ -59,6 +77,12 @@ services:
             interval: 5s
             timeout: 20s
             retries: 3
+            start_period: 10s     # 啟動前 10 秒的失敗不計入
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: unless-stopped
 
     # 初始化容器：負責建立 Bucket
@@ -99,6 +123,18 @@ services:
                     - modlib.redis-local
         volumes:
             - redis_data_local:/data
+        healthcheck:
+            # 使用 redis-cli 發送 PING，若回傳 PONG 代表健康
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 5s         # 每 5 秒檢查一次（Redis 啟動極快，頻率可高一點）
+            timeout: 3s          # 超過 3 秒沒回應視為失敗
+            retries: 5           # 失敗 5 次才標記為 unhealthy
+            start_period: 5s     # 啟動前 5 秒的失敗不計入
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15"  
         restart: unless-stopped
 
     redisinsight:
@@ -111,12 +147,18 @@ services:
                 aliases:
                     - modlib.redisinsight
         depends_on:
-            - redis-local
+            redis-local:
+                condition: service_healthy
         volumes:
             - redisinsight_data:/db
         environment:
             # Optional: Connects RedisInsight to the redis-stack service automatically
             REDIS_HOST: redis-local
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: always
 
 #=================
@@ -145,6 +187,11 @@ services:
             # use empty anonymous volume to avoid not relating code changes in host to container
             - /usr/local/app/ifcToFragsConvertWorker
             - /usr/local/app/tus-server
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: unless-stopped
 
 #=================
@@ -162,15 +209,19 @@ services:
         ports:
             - ${TUS_SERVER_PORT}:${TUS_SERVER_PORT}
         depends_on:
-            - PostgresSQL
-            - minio-local
+            - adminer
             - minio-init
-            - redis-local
+            - redisinsight
         env_file:
             - ./.env
         volumes: 
             - ./tus-server:/usr/local/app
             - ./prisma:/usr/local/prisma
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: unless-stopped
 
 
@@ -201,6 +252,11 @@ services:
             resources:
                 limits:
                     memory: 10G                       # 確保容器本身記憶體不超用10 GB，就不會被 Docker 殺掉
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "2m"   # 單個檔案最大 2MB
+                max-file: "15" 
         restart: unless-stopped
 
 
